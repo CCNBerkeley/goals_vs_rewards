@@ -1,0 +1,4 @@
+.psiturk*
+*.db
+*.log
+config.txt
