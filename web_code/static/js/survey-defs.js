@@ -23,7 +23,7 @@ var debrief_block = {
         '<p>Before we finish, there will be a short voluntary survey.<br/><br/></p>' +
         '<p>[Press ENTER to continue]</p></div>';
   },
-  cont_key: 13,	
+  cont_key: [13],	
   timing_post_trial: 5
 };
 
@@ -35,7 +35,7 @@ var instructions_survey_block2 = {
     '<p>Using your mouse, please move the black cursor to the left or right to choose your option:</p>' +
     "<img src='/static/images/likert_example.png', class='jspsych-instructions-image'>" +
     '<p>[Press ENTER to begin the survey]</p></div>',
-    cont_key: 13,
+    cont_key: [13],
     timing_post_trial: 5
 };
 

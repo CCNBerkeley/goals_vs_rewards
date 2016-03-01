@@ -1,11 +1,11 @@
-
-/* keep a set of all the images files to preload */
+/*
+// keep a set of all the images files to preload 
 preload_set = {};
 
 // preload the used stimuli
 var images_preload = Object.keys(preload_set);
 
-/* pick a game to load from file */
+// pick a game to load from file
 games = [0];
 games = shuffleArray(games);
     
@@ -29,7 +29,7 @@ contextKey = shuffleArray(contextKey);	//
 stimKey    = shuffleArray(stimKey);		// 
 contextID  = shuffleArray(contextID); 	// Radomize which dimension is the context
 
-/* loop through the trials and set the stimuli */
+// loop through the trials and set the stimuli
 for (var ii=0; ii<nTrials; ii++) {
 
 	// store the stimuli and context numbers for easy data analysis
@@ -44,15 +44,30 @@ for (var ii=0; ii<nTrials; ii++) {
 
     probMat.push(1);
     
-    /* set the reward outcomes */
+    // set the reward outcomes
     rewardOutcomes.push(gameData.rewards[ii]);
     
-    /* Misc */
+    // Misc
     trialTypeMat.push(gameData.trial_type[ii])        
 }
+*/
 
+var boxImgs  = ['/static/images/box1.jpg','/static/images/box2.jpg'];
+var goalImgs = ['/static/images/goal1.png','/static/images/goal2.png','/static/images/goal3.png'];
+var goalAsks = []
+
+var banditTrial = {
+    type     : 'banditTask',
+    boxImgs  : boxImgs     ,
+    goalImgs : goalImgs    ,
+    probs    : [0.8, 0.2]  ,
+    inputKeys: ['f','j']   ,
+    timeLimit: 5
+};
+
+/*
 var banditTask = {
-        type          : 'bandit-wo-feedback',
+        type          : 'banditTask',
         stimuli       : stimMat,
         contexts      : contextMat,
         images_path   : imageMat,
@@ -71,28 +86,45 @@ var banditTask = {
         show_score       : true,
         prompt: "<p class='jspsych-single-stim-prompt'><br/> Press one of the following keys: <br/><br/> &#34H&#34  &nbsp; &#34J&#34 &nbsp; &#34K&#34 &nbsp; &#34L&#34 </p>",
 };
+*/
 
 // Setup the experiment
-experiment.push(welcome_block);
-/*
-experiment.push(game_instructions);
-experiment.push(game_instructions_2); 
-experiment.push(game_instructions_3);
-//experiment.push(banditTask);
-experiment.push(debrief_block);
-experiment.push(instructions_survey_block2);
-experiment.push(survey_likert); */
+timeline = [];
+timeline.push(banditTrial)
+//timeline.push(banditTask);
+//timeline.push(debrief_block);
+timeline.push(instructions_survey_block2);
 
-/* start the experiment */
-//psiturk.preloadImages(images_preload, function(){ startExperiment(); });
-psiturk.preloadImages(function(){ startExperiment(); });
+// All pages to be loaded after Ad page which, accepted, splashes to consent page. 
+var pages = ["instruct.html","stage.html","questionnaire.html"];
 
-function startExperiment(){
-    jsPsych.init({
-        timeline: experiment
-        /*
-        display_element: $('#jspsych-target'),
-        experiment_structure: experiment,
+var images = ["/static/images/lit.jpg",
+              "/static/images/normal.jpg",
+              "/static/images/indOn.jpg",
+              "/static/images/indOff.jpg"
+];
+
+psiTurk.preloadPages(pages);
+psiTurk.preloadImages(images);
+
+var instructionPages = ["instruct.html"];
+
+// Task object to keep track of the current phase
+var currentview;
+
+/*******************
+ * Run Task
+ ******************/
+$(window).load( function(){
+    psiTurk.doInstructions(
+        instructionPages,                              // a list of pages you want to display in function
+        function() { currentview = new experiment(); } // what you want to do when you are done with instructions
+    );
+});
+
+function experiment(){ 
+    jsPsych.init({timeline: timeline
+    /*
         on_finish: function(data) {
             psiturk.saveData({
                 success: function () {
@@ -100,9 +132,10 @@ function startExperiment(){
                 }
             });
         },
+        
         on_data_update: function(data) {
             psiturk.recordTrialData(data);
         }
-        */
-    });
+    */
+    })
 }
