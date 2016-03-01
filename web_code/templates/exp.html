@@ -23,40 +23,25 @@
 
 		<!-- Psiturk provided js fields  -->        
 		<script type="text/javascript">
-			var uniqueId    = "{{ uniqueId }}";       // a unique string identifying the worker/task
-			var adServerLoc = "{{ adServerLoc }}";    // the location of your ad 
-			var mode        = "{{ mode }}";
-
-		  // Supplanted by jspsych functionality
+			var uniqueId       = "{{ uniqueId }}";       // a unique string identifying the worker/task
+			var adServerLoc    = "{{ adServerLoc }}";    // the location of your ad 
+			var mode           = "{{ mode }}";
 		  	var condition      = "{{ condition }}";      // the condition number
 		  	var counterbalance = "{{ counterbalance }}"; // a number indexing counterbalancing conditions
 		</script>
-				
-
-		<!--  -->
-        <!-- jsPsych & requirements-->
-        <!--  -->
-        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"> </script>
-        <script src="/static/lib/jspsych-5.0.3/jspsych.js">                             </script>
-        <script src="/static/lib/jspsych-5.0.3/plugins/jspsych-text.js">                </script>
-        <script src="/static/lib/jspsych-5.0.3/plugins/jspsych-single-stim.js">         </script>
-        <script src="/static/lib/jspsych-5.0.3/plugins/jspsych-survey-likert.js">       </script>
-		<link  href="/static/lib/jspsych-5.0.3/css/jspsych.css" rel="stylesheet" type="text/css"> </link>
-
-        <!-- Required for Likert survey -->
-        <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
-        <link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/themes/black-tie/jquery-ui.min.css" rel="stylesheet" type="text/css"></link>
 
 
-        <!--  -->
-        <!-- custom plug-ins, I.e. the task definition -->
-        <!--  -->
-        <script src="/static/js/jspsych-bandit.js"></script>
-        
+		<!--
+		 <script src="/static/data/data1.js"       type="text/javascript"> </script>
+		 -->
+
+		<!-- Customized JS -->
+		<script src="/static/js/exp.js"           type="text/javascript"> </script>
+		<script src="/static/js/questionnaire.js" type="text/javascript"> </script>
+		<script src="/static/js/driver.js"        type="text/javascript"> </script>
+
     </head>
     <body>
-       	<div id="jspsych-target"></div>
-
 	    <noscript>
 			<h1>Warning: Javascript seems to be disabled</h1>
 			<p>This website requires that Javascript be enabled on your browser.</p>
@@ -64,26 +49,5 @@
 			<a href="http://support.google.com/bin/answer.py?hl=en&answer=23852">here</a><p>
 		</noscript>
     </body>
-
-	<!-- 
-	Experiment Javascript Files:
-		data1.js         - a/the data file
-		exp.js           - code for the actual experiment
-		questionnaire.js - code (including psiturk calls) for the questionnaire.
-		driver.js        - psiturk object setup, preloads, instruction click-through order, and exp.js caller.
-
-		Note: It is important that "driver.js" appears last because it sets the experiment in motion.
-
-	Supplanted by jspsych:
-	<script src="/static/data/data1.js"       type="text/javascript"> </script>
-	<script src="/static/js/questionnaire.js" type="text/javascript"> </script>
-	<script src="/static/js/driver.js"        type="text/javascript"> </script>
-		-->
-
-    <!-- Run the experiment -->
-	<script src="/static/js/survey-defs.js" type="text/javascript"> </script>
-	<script src="/static/js/exp-defs.js"    type="text/javascript"> </script>
-	<script src="/static/js/exp-driver.js"  type="text/javascript"> </script>
-
 </html>
 
