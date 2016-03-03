@@ -1,7 +1,7 @@
 //------------------------------------------------------------//
 // This file defines the "actual" goals-vs-rewards task. 
 //------------------------------------------------------------//
-var experiment = function() {
+var experiment = function(stim_order, succ_probs) {
 	var choice_start;
 	var too_late_timer;
 
@@ -11,8 +11,6 @@ var experiment = function() {
 					   "/static/images/goal3.png"];
 	var subphase    = "goals";
 	var listening   = false;
-	var stim_order  = [0,1,0];
-	var succ_probs  = [0.8,0.2];
 	var goal_avail  = [0,2];
 	var goal_ind    = 1;
 	//stim_order = _.shuffle(stim_order);
