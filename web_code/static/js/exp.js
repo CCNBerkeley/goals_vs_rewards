@@ -1,23 +1,23 @@
 //------------------------------------------------------------//
 // This file defines the "actual" goals-vs-rewards task. 
 //------------------------------------------------------------//
-var experiment = function(stim_order, succ_probs) {
+var experiment = function(task_set,box_images,goal_images) {
 	var choice_start;
 	var too_late_timer;
 
-	var box_images  = ["/static/images/box1.jpg","/static/images/box2.jpg"];
-	var goal_images = ["/static/images/goal1.png",
-					   "/static/images/goal2.png",
-					   "/static/images/goal3.png"];
+	// Initial setup. Since updateAvial will be called, goal_avail will be [0,1] at first presentation.
 	var subphase    = "goals";
 	var listening   = false;
 	var goal_avail  = [0,2];
-	var goal_ind    = 1;
-	//stim_order = _.shuffle(stim_order);
+	var selection   = 1;					// Left item -> 0, right item -> 1
+	var goal_picked = 1;
+	var phase       = "training";			// Protocal section: training or testing
+	
+	//stims_train = _.shuffle(stims_train);
 
 	// This updates the goals which will be displayed as availabe choices.
-	function updateAvail(goal_ind,goal_avail){
-		var goal_chosen = goal_avail[goal_ind];
+	function updateAvail(selection,goal_avail){
+		goal_chosen = goal_avail[selection];
 		switch (goal_chosen) {
 			case 0:
 				return [1,2];
@@ -32,9 +32,9 @@ var experiment = function(stim_order, succ_probs) {
 	};
 
 	// This runs when a participant runs out of time on a non-goal trial.
-	function tooLate(){
+	function expireUI(){
 		listening = false;
-		var response = "";
+		var response = -1;
 
 		d3.select("#trial").style("display","none");
 
@@ -45,42 +45,67 @@ var experiment = function(stim_order, succ_probs) {
 		setTimeout(function(){
 			d3.select("#too-long-div").remove();
 			var resp_time = -1;
-			recordAndContinue(resp_time,response);
+			recordAndContinue(resp_time,response,phase);
 		},2000)
 	};
 
 	// This records data and continues the experiment.
-	function recordAndContinue(resp_time,response){
-//		var cur_probs  = (cur_order == 0) ? succ_probs:succ_probs.reverse();
-//		var goal_found = Math.random() < cur_probs(goal_ind);
+	function recordAndContinue(resp_time,response,phase){
 
-		psiTurk.recordTrialData({'phase'     :"TEST",
-                                 'response'  :response,
-                                 //'goal_found':goal_found,
-                                 'resp_time' :resp_time}
-                               );
-		switch (subphase){
-			case "goals":
-				subphase = "boxes";
-				break;
-			case "boxes":
-				subphase = "goals"
-				break;
-		}
+		var responded   = resp_time > 0;			// Did the subject respond?
+		var wait_time   = (responded) ? 2000:0; 	// Time until doNextStep()
 
-		if (resp_time > 0){
-			var wait_time = 2000;
+		if (responded){
+			switch (subphase){
+				case "goals":
+					var correct = -1
+					var reward  = -1
+
+					goal_picked = response;
+					break;
+
+				case "boxes":
+					var correct = ((cur_order == 0 && response == 0) || (cur_order == 1 && response == 1));
+					var reward  = (rew_corr_choice && correct) || (!rew_corr_choice && !correct);
+					break;
+			}
+
 			d3.select("#img" + rem_ind).remove();
-			d3.select("#query").html('<p id="prompt">Your selection ...</p>');			
+			d3.select("#query").html('<p id="prompt">Your selection ...</p>');		
+
+			if (subphase == "boxes") {
+
+				var img_options = [goal_images[goal_avail[0]],goal_images[goal_avail[1]]];
+				var box_content = (reward) ? img_options[goal_picked]:img_options[(goal_picked+1)%2];
+
+				setTimeout(function(){
+					d3.select("#img" + (rem_ind+1) % 2).attr("src"   ,box_content);
+					d3.select("#img" + (rem_ind+1) % 2).attr("srcset",box_content);
+					d3.select("#query").html('<p id="prompt"> Outcome ...</p>');
+				},2000)
+
+				wait_time = wait_time + 2000;
+			};
 		}
-		else{
-			var wait_time = 0;
-		}
+		else {
+			var correct = -1;
+			var reward  = -1;
+		};
+
+		psiTurk.recordTrialData({'phase'     : phase,
+								 'subphase'  : subphase,
+                                 'response'  : response,
+                                 'correct'   : correct,
+                                 'reward'    : reward,
+                                 'resp_time' : resp_time}
+                               );
+
+		subphase = (subphase == "goals") ? "boxes":"goals";
 
 		setTimeout(function(){
 			d3.select("#img0").remove();
 			d3.select("#img1").remove();
-			nextStep();
+			doNextStep();
 		},wait_time)
 	};
 
@@ -103,19 +128,19 @@ var experiment = function(stim_order, succ_probs) {
 		choice_start = new Date().getTime();
 		listening = true;
 		if (subphase == "boxes"){
-			too_late_timer = setTimeout(tooLate,2000);
+			too_late_timer = setTimeout(expireUI,2000);
 		}
 	};
 
 	// This is used to advance through the goal-fixation-box cycle.
-	var nextStep = function() {
-		if (stim_order.length===0) {
+	var doNextStep = function() {
+		if (task_set.length===0) {
 			finish();
 		}
 		else {
 			if (subphase == "goals"){
 				d3.select("#trial").style("display","inline");
-				goal_avail = updateAvail(goal_ind,goal_avail)
+				goal_avail = updateAvail(goal_picked,goal_avail)
 				var goals = [goal_images[goal_avail[0]], goal_images[goal_avail[1]]];
 				displayChoice(goals)
 			}
@@ -123,9 +148,24 @@ var experiment = function(stim_order, succ_probs) {
 				d3.select("#trial").style("display","none");
 				d3.select("#fixation").style("display","inline");
 
-				var cur_order  = stim_order.shift();
-				var stim       = (cur_order == 0) ? box_images:box_images.reverse();
-				setTimeout(function(){displayChoice(stim);},500);
+				var cur_task = task_set.shift();
+
+				cur_order       = cur_task[2];
+				rew_corr_choice = cur_task[1];
+
+				var box_img_subset = [];
+				switch (cur_task[0]) {
+					case "AB":
+						box_img_subset = box_images.slice(0,2);
+						break;
+					case "BC":
+						box_img_subset = box_images.slice(2,4);
+						break;
+				}
+
+				var box_options = (cur_order == 0) ? box_img_subset:box_img_subset.reverse();
+
+				setTimeout(function(){displayChoice(box_options);},500);
 			}
 		}
 	};
@@ -137,26 +177,27 @@ var experiment = function(stim_order, succ_probs) {
 		var keyCode = e.keyCode
 		var	response;
 
+		// response and selection are the same, need to simplify this
 		switch (keyCode) {
 			case 70: // "F"
-				response = "left";
-				goal_ind = 0;
-				rem_ind  = 1;
+				response  = 0;
+				selection = 0;
+				rem_ind   = 1;
 				break;
 			case 74: // "J"
-				response = "right";
-				goal_ind = 1;
-				rem_ind  = 0;
+				response  = 1;
+				selection = 1;
+				rem_ind   = 0;
 				break;
 			default:
-				response = "";
+				response = -1;
 				break;
 		}
-		if (response.length > 0) {
+		if (response > -1) {
 			var resp_time  = new Date().getTime() - choice_start;
 			listening = false;
 			clearTimeout(too_late_timer);
-			recordAndContinue(resp_time,response);
+			recordAndContinue(resp_time,response,phase);
 		}
 	};
 
@@ -177,5 +218,5 @@ var experiment = function(stim_order, succ_probs) {
 	$("body").focus().keydown(response_handler); 
 
 	// Start the test
-	nextStep();
+	doNextStep();
 };
