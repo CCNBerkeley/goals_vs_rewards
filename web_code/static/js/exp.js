@@ -1,7 +1,7 @@
 //------------------------------------------------------------//
 // This file defines the "actual" goals-vs-rewards task. 
 //------------------------------------------------------------//
-var experiment = function(task_set,box_images,goal_images) {
+var experiment = function(task_set,box_images,goal_images,phase) {
 	var choice_start;
 	var too_late_timer;
 
@@ -11,10 +11,18 @@ var experiment = function(task_set,box_images,goal_images) {
 	var goal_avail  = [0,2];
 	var selection   = 1;					// Left item -> 0, right item -> 1
 	var goal_picked = 1;
-	var phase       = "training";			// Protocal section: training or testing
-	
-	//stims_train = _.shuffle(stims_train);
 
+	if (phase == 'inst') {
+		var task_set = [{boxes: "AB" ,
+				 		 yield: true ,
+		    	 		 order: 1   }];
+
+		var resp_count  = 0;  				// How many times in a row has the subject responded in time?
+		var resp_fail   = 0;  				// How many times in a row has the subject failed to respond?
+		var gets_it = false;				// Is the subject ready to move on?
+		var resp_thresh = 1;			    // Declare ready to continue if resp_count >= resp_thresh.
+	};
+	
 	// This updates the goals which will be displayed as availabe choices.
 	function updateAvail(selection,goal_avail){
 		goal_chosen = goal_avail[selection];
@@ -36,24 +44,24 @@ var experiment = function(task_set,box_images,goal_images) {
 		listening = false;
 		var response = -1;
 
-		d3.select("#trial").style("display","none");
-
-		var too_long_text = "<h1>Sorry, you took to long!</h1><body>Please respond faster next time.<body>"
-		var too_long_div  = d3.select("#container-exp").append("div").html(too_long_text);
-		too_long_div.attr("id","too-long-div")
+		d3.select("#img0").remove();
+		d3.select("#img1").remove();
+		d3.select("#header").html("Sorry, you took to long!")
+		d3.select("#prompt").html("Please respond faster next time. <br> In the experiment you won't be notified, the next cycle will just start.")
 
 		setTimeout(function(){
-			d3.select("#too-long-div").remove();
 			var resp_time = -1;
 			recordAndContinue(resp_time,response,phase);
-		},2000)
+		},6000)
 	};
 
 	// This records data and continues the experiment.
 	function recordAndContinue(resp_time,response,phase){
 
-		var responded   = resp_time > 0;			// Did the subject respond?
-		var wait_time   = (responded) ? 2000:0; 	// Time until doNextStep()
+		var responded    = resp_time > 0;			// Did the subject respond?
+		var time_to_step = (responded) ? 4000:0; 	// Minimum time until doNextStep()
+		var time_to_fix  = (responded) ? 2000:0;
+		var time_to_show = (responded) ? 2000:0;
 
 		if (responded){
 			switch (subphase){
@@ -65,31 +73,48 @@ var experiment = function(task_set,box_images,goal_images) {
 					break;
 
 				case "boxes":
-					var correct = ((cur_order == 0 && response == 0) || (cur_order == 1 && response == 1));
+					var correct = ((cur_order == 1 && response == 0) || (cur_order == -1 && response == 1));
 					var reward  = (rew_corr_choice && correct) || (!rew_corr_choice && !correct);
+
+					if (phase == 'inst') {resp_count++; resp_fail = 0}
 					break;
 			}
 
 			d3.select("#img" + rem_ind).remove();
-			d3.select("#query").html('<p id="prompt">Your selection ...</p>');		
+			d3.select("#fixation").style("display","none");
+
+			if (phase == "inst") {d3.select("#prompt").html('<p id="prompt">Your Selection</p>')};
 
 			if (subphase == "boxes") {
 
 				var img_options = [goal_images[goal_avail[0]],goal_images[goal_avail[1]]];
 				var box_content = (reward) ? img_options[goal_picked]:img_options[(goal_picked+1)%2];
 
-				setTimeout(function(){
-					d3.select("#img" + (rem_ind+1) % 2).attr("src"   ,box_content);
-					d3.select("#img" + (rem_ind+1) % 2).attr("srcset",box_content);
-					d3.select("#query").html('<p id="prompt"> Outcome ...</p>');
-				},2000)
+				if (phase != "test") {
+					setTimeout(function(){
+						d3.select("#img" + (rem_ind+1) % 2).attr("src"   ,box_content);
+						d3.select("#img" + (rem_ind+1) % 2).attr("srcset",box_content);
+						
+						if (phase == "inst") {d3.select("#prompt").html('<p id="prompt"> This Box\'s Contents</p>')};
+					},time_to_show)
 
-				wait_time = wait_time + 2000;
+					time_to_step = time_to_step + time_to_show;
+				    time_to_fix  = time_to_fix  + time_to_show;
+				};
 			};
+
+			setTimeout(function(){
+				d3.select("#img" + (rem_ind+1) % 2).remove();
+				d3.select("#fixation").style("display","inline");
+				d3.select("#prompt").html('')
+				d3.select('#header').style('visibility',"hidden");
+			},time_to_fix)
+
 		}
 		else {
 			var correct = -1;
 			var reward  = -1;
+			if (phase == 'inst') {resp_count = 0; resp_fail++}
 		};
 
 		psiTurk.recordTrialData({'phase'     : phase,
@@ -100,20 +125,36 @@ var experiment = function(task_set,box_images,goal_images) {
                                  'resp_time' : resp_time}
                                );
 
-		subphase = (subphase == "goals") ? "boxes":"goals";
+		if (phase == 'inst' && resp_count <= resp_thresh && subphase == 'boxes') {
+			task_set.push(updateTrainingTask(cur_task))
+		};
+
+		if (responded) {
+			subphase = (subphase == "goals") ? "boxes":"goals";
+		}
+		else {
+			subphase = "goals";
+		};
 
 		setTimeout(function(){
 			d3.select("#img0").remove();
 			d3.select("#img1").remove();
+			d3.select("#fixation").style("display","inline");
 			doNextStep();
-		},wait_time)
+		},time_to_step)
 	};
 
 	// This displays a choice between two options, be they goals or boxes.
 	function displayChoice(choice){
-		d3.select("#trial").style("display","inline");
-	    d3.select("#fixation").style("display","none");
-		d3.select("#query").html('<p id="prompt">Type "F" selects left, "J" to selects right.</p>');
+		d3.select("#trial"   ).style("display","inline");
+	    d3.select("#fixation").style("display","inline" );
+
+	    if (phase == "inst"){
+	    	d3.select('#header'  ).style('visibility',"visible");
+	    }
+
+		var prompt_text = '<p id="prompt">Type "F" to select the left item or "J" to select right item.</p>';
+		d3.select("#prompt").html(prompt_text);
 
 		d3.select("#item0")
 			.append("img")
@@ -127,9 +168,9 @@ var experiment = function(task_set,box_images,goal_images) {
 
 		choice_start = new Date().getTime();
 		listening = true;
-		if (subphase == "boxes"){
+		//if (subphase == "boxes"){
 			too_late_timer = setTimeout(expireUI,2000);
-		}
+		//}
 	};
 
 	// This is used to advance through the goal-fixation-box cycle.
@@ -139,37 +180,76 @@ var experiment = function(task_set,box_images,goal_images) {
 		}
 		else {
 			if (subphase == "goals"){
-				d3.select("#trial").style("display","inline");
+				d3.select("#trial"   ).style("display","inline");
+				d3.select("#fixation").style("display","inline" );
+				d3.select('#header'  ).html ("Please select an item.");
+
+				if (phase == "inst") {
+					d3.select('#header'  ).style('visibility',"visible");
+				}
+
 				goal_avail = updateAvail(goal_picked,goal_avail)
 				var goals = [goal_images[goal_avail[0]], goal_images[goal_avail[1]]];
 				displayChoice(goals)
 			}
 			else {
-				d3.select("#trial").style("display","none");
-				d3.select("#fixation").style("display","inline");
+				//d3.select("#trial"   ).style("display","none");
+				//d3.select("#fixation").style("display","none");
 
-				var cur_task = task_set.shift();
+				cur_task = task_set.shift();
 
-				cur_order       = cur_task[2];
-				rew_corr_choice = cur_task[1];
+				cur_order       = cur_task.order;
+				rew_corr_choice = cur_task.yield;
 
 				var box_img_subset = [];
-				switch (cur_task[0]) {
-					case "AB":
-						box_img_subset = box_images.slice(0,2);
+				switch (cur_task.boxes.slice(0,1)) {
+					case "A":
+						box_img_subset[0] = box_images.boxA;
 						break;
-					case "BC":
-						box_img_subset = box_images.slice(2,4);
+					case "B":
+						box_img_subset[0] = box_images.boxB;
+						break;
+					case "C":
+						box_img_subset[0] = box_images.boxC;
+						break;
+					case "D":
+						box_img_subset[0] = box_images.boxD;
 						break;
 				}
 
-				var box_options = (cur_order == 0) ? box_img_subset:box_img_subset.reverse();
+				switch (cur_task.boxes.slice(1,2)) {
+					case "A":
+						box_img_subset[1] = box_images.boxA;
+						break;
+					case "B":
+						box_img_subset[1] = box_images.boxB;
+						break;
+					case "C":
+						box_img_subset[1] = box_images.boxC;
+						break;
+					case "D":
+						box_img_subset[1] = box_images.boxD;
+						break;
+				}
 
-				setTimeout(function(){displayChoice(box_options);},500);
+				var box_options = (cur_order == 1) ? box_img_subset:box_img_subset.reverse();
+
+				setTimeout(function(){
+					d3.select('#header'  ).html ("Please select a box to look in.");
+					displayChoice(box_options);
+				},500);
 			}
 		}
 	};
 	
+	function updateTrainingTask(task){
+		var new_boxes = (task.boxes == "AB") ? "CD" :"AB";
+		var new_yield = (task.yield        ) ? false:true;
+		var new_order = (task.order == 1   ) ? -1   :1   ;
+
+		return {boxes:new_boxes, yield:new_yield, order:new_order}
+	};
+
 	// Takes input...
 	var response_handler = function(e) {
 		if (!listening) return;
@@ -204,14 +284,41 @@ var experiment = function(task_set,box_images,goal_images) {
 	// This moves the participant out of the experimental task
 	// and on to the questionaire.
 	var finish = function() {
-	    $("body").unbind("keydown", response_handler); // Unbind keys
-	    currentview = new Questionnaire();
-	};
-	
+		$("body").unbind("keydown", response_handler); // Unbind keys
 
+		switch (phase) {
+        	case 'inst':
+				d3.select("#stage_inst_button_row").style("display","inline")
+				d3.select("#prompt").html("It looks like you're getting the hang of it. <br> You may continue or re-read the instructions. <br>")
+        		//psiTurk.showPage("recap.html")
+        		/*
+        	    psiTurk.doInstructions(
+			        ["recap.html"],
+			        function() {
+			        	currentview = new experiment(train_set,box_images,goal_images,"train");
+			        	//currentview = new experiment(train_set,box_images,goal_images,"learn")
+			        })
+	        	//currentview = new experiment(train_set,box_images,goal_images,"train");
+	        	*/
+	        	break;
+
+		    case 'train':
+	        	currentview = new experiment(test_set,box_images,goal_images,"test" );
+	        	break;
+
+			case 'test':
+		    	currentview = new Questionnaire();
+		    	break;
+        }
+	};
 
 	// Load the stage.html snippet into the body of the page
-	psiTurk.showPage('stage.html');
+
+	if (phase != "inst") {
+		psiTurk.showPage('stage.html');
+		d3.select('#header').style("visibility","hidden");
+		d3.select('#prompt').style("visibility","hidden");
+	};
 
 	// Register the response handler that is defined above to handle any
 	// key down events.

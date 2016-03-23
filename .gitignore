@@ -2,3 +2,4 @@
 *.db
 *.log
 config.txt
+*.m~

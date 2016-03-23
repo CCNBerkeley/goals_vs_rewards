@@ -1,33 +1,65 @@
 
 <div id="container-questionnaire">
-    <h1>Task Complete</h1>
+    <h1>Congratulations, You've Finished!</h1>
     <hr>
-    <p> And 60 seconds is UP! </p>
+    
+    <p> Please fill out any portion of the short, ANONYMOUS survey below with which you are comfortable and click "Submit Response" to complete the HIT. Any information you choose to provide will be collected for our research purposes only.
+    </p>
 
     <div class="instructions well">
         <form id="postquiz" action="debrief" method="post">
             <!-- beginning of a question -->
             <div class="row question">
                 <div class="col-md-8">
-                    Please distribute 100 points among the catagories below to indicate how you consider the radiation to have affected luminescence. Remember a 0 means you have no confidence in a particular relationship and 100 means you have absolute confidence in said relationship. 
+
                 </div>
                 <br/>
-                <br/>
-                 <fieldset>
-                    <legend>Ratings by Type of Relationship:</legend>
-                    <table align="center">
-                        <tr>
-                            <td align="center">Causal</td>
-                            <td align="center">Preventative</td>
-                            <td align="center">None</td>
-                        </tr>
-                        <tr>
-                            <td><input name="rateFieldC" type="text" size="10" id="responseC"/></td>
-                            <td><input name="rateFieldP" type="text" size="10" id="responseP"/></td>
-                            <td><input name="rateFieldN" type="text" size="10" id="responseN"/></td>
-                        </tr>
-                    </table>
-                </fieldset>
+
+                <table>
+                <tr>
+                <td>
+                <p>What gender do you consider yourself?</p>
+                <input type="radio" name="gender" value="male"   > Male             <br>
+                <input type="radio" name="gender" value="female" > Female           <br>
+                <input type="radio" name="gender" value="other"  > Other            <br>
+                <input type="radio" name="gender" value="decline"> Decline to State <br>
+                </td>
+
+                <td>
+                <p>What age are you?</p>
+                <input type="radio" name="age" value="young"  > 18-25            <br>
+                <input type="radio" name="age" value="middle" > 26-30            <br>
+                <input type="radio" name="age" value="old"    > 30-35            <br>
+                <input type="radio" name="age" value="senior" > 36-40            <br>
+                <input type="radio" name="age" value="unknown"> 40+              <br>
+                <input type="radio" name="age" value="decline"> Decline to State <br>
+                </td>
+                </tr>
+
+                <tr>
+                <td>
+                <p>What formal education do you possess?</p>
+                <input type="radio" name="age" value="none"   > None                         <br>
+                <input type="radio" name="age" value="elem"   > Elementary School (K - 5)    <br>
+                <input type="radio" name="age" value="middle" > Middle School     (5 - 8)    <br>
+                <input type="radio" name="age" value="high"   > High School       (9 - 12)   <br>
+                <input type="radio" name="age" value="uni"    > University                   <br>
+                <input type="radio" name="age" value="grad"   > Graduate/Professional School <br>
+                <input type="radio" name="age" value="decline"> Decline to State             <br>
+                </td>
+
+                <td>
+                <p>Do you consider yourself any of the following?</p>
+                <input type="checkbox" name="gender" value="african"> African American                    <br>
+                <input type="checkbox" name="gender" value="asian"  > Asian                               <br>
+                <input type="checkbox" name="gender" value="white"  > Caucasian                           <br>
+                <input type="checkbox" name="gender" value="native" > Native American                     <br>
+                <input type="checkbox" name="gender" value="pacific"> Native Hawaiian or Pacific Islander <br>
+                <input type="checkbox" name="gender" value="decline"> Decline to State                    <br>
+                </td>
+                </tr>
+                </table>
+
                 <br/>
 
                 <!-- <input name="trackerField" type="text" size="10" id="responseDsc" style="display:none"/> -->
