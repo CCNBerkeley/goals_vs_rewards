@@ -34,8 +34,60 @@ end
 
 perm = randperm(360);
 
-full = [ab; cd];
-full = full(perm,:);
+training = [ab; cd];
+training = training(perm,:);
+
+clear ab
+clear bc
+
+test = { ...
+ '"AB"', 'true', 1; ...
+ '"AC"', 'true', 1; ...
+ '"AD"', 'true', 1; ...
+ '"BC"', 'true', 1; ...
+ '"BD"', 'true', 1; ...
+ '"CD"', 'true', 1; ...
+...
+ '"AB"', 'true', -1; ...
+ '"AC"', 'true', -1; ...
+ '"AD"', 'true', -1; ...
+ '"BC"', 'true', -1; ...
+ '"BD"', 'true', -1; ...
+ '"CD"', 'true', -1; ...
+ };
+
+test = repmat(test,5,1);
+perm = randperm(5*2*6);
+test = test(perm,:);
+
+fileID = fopen('game_data.js','w');
+fprintf(fileID,'%s','var train_set = [');
+for i=1:360
+    object_str = [          '{boxes:'         training{i,1} ','];
+    object_str = [object_str 'yield:'         training{i,2}  ','];
+    object_str = [object_str 'order:' num2str(training{i,3}) '}'];
+    fprintf(fileID,'%s',object_str);
+    
+    if i < 360
+        fprintf(fileID,'%s',',');
+    end
+end
+fprintf(fileID,'%s\r\n','];');
+fprintf(fileID,'%s','var test_set = [');
+
+for i=1:5*2*6
+    object_str = [          '{boxes:'         test{i,1} ','];
+    object_str = [object_str 'yield:'         test{i,2}  ','];
+    object_str = [object_str 'order:' num2str(test{i,3}) '}'];
+    fprintf(fileID,'%s',object_str);
+    
+    if i < 5*2*6
+        fprintf(fileID,'%s',',');
+    end
+end
+fprintf(fileID,'%s',']');
+
+fclose(fileID);
 
 end
 

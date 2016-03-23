@@ -8,6 +8,8 @@ var mycounterbalance = counterbalance;  // they tell you which condition you hav
 // Debuging test set or set from
 var debug = true;
 if (debug) {
+	// Overwrites the loaded data;
+	
 	var train_set = [{boxes: "CD" ,
 					 yield: false ,
 			    	 order: 1   },
@@ -17,7 +19,6 @@ if (debug) {
 			    	 order: -1   },
 	];
 
-	// Very small test set:
 	var test_set = [{boxes: "AB" ,
 					 yield: true ,
 			    	 order: 1   },
@@ -34,16 +35,7 @@ if (debug) {
 			         yield: false,
 			         order: 1    }
 	];
-}
-else {
-/*	$.ajax({
-		type: 'GET',
-		url: '../../gameData.json',
-		dataType: 'json',
-		success: function(data) {gameData = data;},
-		async: false
-	});
-*/};
+};
 
 var box_images  = {boxA: "/static/images/boxA.jpg",
 				   boxB: "/static/images/boxB.jpg",

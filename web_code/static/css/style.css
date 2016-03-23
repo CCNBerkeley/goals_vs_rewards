@@ -40,8 +40,14 @@ strong {
     background: white;
 }
 
-#stage_inst_button_row {
+#stage_inst_button_row{
   display: none;
+}
+
+#okbutton {
+  display: none;
+  margin-left:auto; 
+  margin-right:auto;
 }
 
 #container-consent, #container-exp {  /* override padding to fit long consent forms and exp display*/

@@ -43,27 +43,52 @@ var experiment = function(task_set,box_images,goal_images,phase) {
 	function expireUI(){
 		listening = false;
 		var response = -1;
+		var resp_time = -1;
 
-		d3.select("#img0").remove();
-		d3.select("#img1").remove();
-		d3.select("#header").html("Sorry, you took to long!")
-		d3.select("#prompt").html("Please respond faster next time. <br> In the experiment you won't be notified, the next cycle will just start.")
-
-		setTimeout(function(){
-			var resp_time = -1;
+		if (phase == "inst") {
+			d3.select("#img0").remove();
+			d3.select("#img1").remove();
+			d3.select("#header").html("Sorry, you took to long!")
+			d3.select("#prompt").html("Please respond faster next time. <br> In the experiment you won't be notified, the next cycle will just start.")
+	
+			d3.select("#okbutton").style("display","inline");
+	
+			$('.okgotit').bind('click', function() {
+				d3.select("#okbutton").style("display","none");
+				$('.okgotit').unbind('');
+				recordAndContinue(resp_time,response,phase);
+			});
+		}
+		else {
 			recordAndContinue(resp_time,response,phase);
-		},6000)
+		};
+		//setTimeout(function(){
+		//	var resp_time = -1;
+		//	recordAndContinue(resp_time,response,phase);
+		//},6000)
 	};
 
 	// This records data and continues the experiment.
 	function recordAndContinue(resp_time,response,phase){
 
-		var responded    = resp_time > 0;			// Did the subject respond?
-		var time_to_step = (responded) ? 4000:0; 	// Minimum time until doNextStep()
-		var time_to_fix  = (responded) ? 2000:0;
-		var time_to_show = (responded) ? 2000:0;
+		var responded = resp_time > 0;		     	// Did the subject respond?
 
+		var chosen_duration = 0.5*1000;				// Time for which the chosen item is shown
+		var total_duration  = chosen_duration;      // In case of goals subphase, otherwise more (added to later)
+
+		var fix_duration    = (subphase == "boxes") ? 0.5*1000:1;	// Fixation period length
+		var result_duration = (subphase == "boxes") ? 1.0*1000:1;   // Time for which box contents are shown
+
+		// Timeline:
+		//   0   - Show the participant what they chose
+		//   0.5 - Show box content if we're on box choice or proceed to doNextStep()
+		//
+		//   If on box choice:
+		//   1.5 - Show fixation
+		//   2.0 - Proceed to doNextStep
 		if (responded){
+
+			// If boxes subphase, assign correctness & reward
 			switch (subphase){
 				case "goals":
 					var correct = -1
@@ -80,36 +105,43 @@ var experiment = function(task_set,box_images,goal_images,phase) {
 					break;
 			}
 
+			// Show the participant what they chose
 			d3.select("#img" + rem_ind).remove();
 			d3.select("#fixation").style("display","none");
 
 			if (phase == "inst") {d3.select("#prompt").html('<p id="prompt">Your Selection</p>')};
 
+
+			// If we're opening boxes, we have to...
+			//   1) increase the wait time before moving on
+			//   2) show the content of the box
 			if (subphase == "boxes") {
 
 				var img_options = [goal_images[goal_avail[0]],goal_images[goal_avail[1]]];
 				var box_content = (reward) ? img_options[goal_picked]:img_options[(goal_picked+1)%2];
 
+				// Wait for chosen duration to end then show Result
 				if (phase != "test") {
 					setTimeout(function(){
 						d3.select("#img" + (rem_ind+1) % 2).attr("src"   ,box_content);
 						d3.select("#img" + (rem_ind+1) % 2).attr("srcset",box_content);
 						
 						if (phase == "inst") {d3.select("#prompt").html('<p id="prompt"> This Box\'s Contents</p>')};
-					},time_to_show)
+					},chosen_duration)
 
-					time_to_step = time_to_step + time_to_show;
-				    time_to_fix  = time_to_fix  + time_to_show;
+					total_duration = total_duration + result_duration;
 				};
+
+				// Wait for chosen duration and result duration to end, then show fixation
+				setTimeout(function(){
+					d3.select("#img" + rem_ind).remove();
+					d3.select("#img" + (rem_ind+1) % 2).remove();
+					d3.select("#fixation").style("display","inline");
+					d3.select("#prompt").html('')
+					d3.select('#header').style('visibility',"hidden");
+				},chosen_duration + result_duration)
+				total_duration = total_duration + fix_duration;
 			};
-
-			setTimeout(function(){
-				d3.select("#img" + (rem_ind+1) % 2).remove();
-				d3.select("#fixation").style("display","inline");
-				d3.select("#prompt").html('')
-				d3.select('#header').style('visibility',"hidden");
-			},time_to_fix)
-
 		}
 		else {
 			var correct = -1;
@@ -133,6 +165,13 @@ var experiment = function(task_set,box_images,goal_images,phase) {
 			subphase = (subphase == "goals") ? "boxes":"goals";
 		}
 		else {
+			if (phase != "inst") {
+				task_set.shift();
+				//goal_picked = Math.floor(Math.random());
+			}
+			if (subphase == "goals") {
+				goal_picked = Math.floor(Math.random()*2);
+			};
 			subphase = "goals";
 		};
 
@@ -141,8 +180,10 @@ var experiment = function(task_set,box_images,goal_images,phase) {
 			d3.select("#img1").remove();
 			d3.select("#fixation").style("display","inline");
 			doNextStep();
-		},time_to_step)
+		},total_duration)
 	};
+
+
 
 	// This displays a choice between two options, be they goals or boxes.
 	function displayChoice(choice){
@@ -190,6 +231,10 @@ var experiment = function(task_set,box_images,goal_images,phase) {
 
 				goal_avail = updateAvail(goal_picked,goal_avail)
 				var goals = [goal_images[goal_avail[0]], goal_images[goal_avail[1]]];
+
+				if (phase == "inst" && Math.floor(Math.random()*2) == 1) {
+					goals = goals.reverse();
+				};
 				displayChoice(goals)
 			}
 			else {
@@ -234,10 +279,10 @@ var experiment = function(task_set,box_images,goal_images,phase) {
 
 				var box_options = (cur_order == 1) ? box_img_subset:box_img_subset.reverse();
 
-				setTimeout(function(){
+				//setTimeout(function(){
 					d3.select('#header'  ).html ("Please select a box to look in.");
 					displayChoice(box_options);
-				},500);
+				//},500);
 			}
 		}
 	};
