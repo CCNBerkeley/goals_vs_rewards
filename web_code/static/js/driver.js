@@ -47,7 +47,7 @@ var goal_images = ["/static/images/goal1.png",
 				   "/static/images/goal3.png"];
 
 // All pages to be loaded after Ad page which, accepted, splashes to consent page. 
-var pages = ["instruct.html","stage_inst.html","recap.html","stage.html","questionnaire.html"];
+var pages = ["instruct.html","stage_inst.html","recap.html","stage.html","train_test_partition.html","questionnaire.html"];
 
 psiTurk.preloadPages (pages);
 psiTurk.preloadImages(box_images);

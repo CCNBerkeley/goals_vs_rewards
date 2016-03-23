@@ -70,7 +70,6 @@ var experiment = function(task_set,box_images,goal_images,phase) {
 
 	// This records data and continues the experiment.
 	function recordAndContinue(resp_time,response,phase){
-
 		var responded = resp_time > 0;		     	// Did the subject respond?
 
 		var chosen_duration = 0.5*1000;				// Time for which the chosen item is shown
@@ -132,6 +131,7 @@ var experiment = function(task_set,box_images,goal_images,phase) {
 					total_duration = total_duration + result_duration;
 				};
 
+				var addnl_time = (phase != "test") ? result_duration:0;
 				// Wait for chosen duration and result duration to end, then show fixation
 				setTimeout(function(){
 					d3.select("#img" + rem_ind).remove();
@@ -139,7 +139,7 @@ var experiment = function(task_set,box_images,goal_images,phase) {
 					d3.select("#fixation").style("display","inline");
 					d3.select("#prompt").html('')
 					d3.select('#header').style('visibility',"hidden");
-				},chosen_duration + result_duration)
+				},chosen_duration + addnl_time)
 				total_duration = total_duration + fix_duration;
 			};
 		}
@@ -348,7 +348,12 @@ var experiment = function(task_set,box_images,goal_images,phase) {
 	        	break;
 
 		    case 'train':
-	        	currentview = new experiment(test_set,box_images,goal_images,"test" );
+        		psiTurk.showPage("train_test_partition.html");
+		
+				$('.okgotit').bind('click', function() {
+					$('.okgotit').unbind('');
+	        		currentview = new experiment(test_set,box_images,goal_images,"test" );
+				});
 	        	break;
 
 			case 'test':
