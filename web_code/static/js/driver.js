@@ -1,38 +1,60 @@
-/*
- * Requires:
- *     psiturk.js
- *     utils.js
- */
-
 // Initalize psiturk object
 var psiTurk = new PsiTurk(uniqueId, adServerLoc, mode);
 
-var mycondition = condition;            // these two variables are passed by the psiturk server process
+var mycondition      = condition;       // these two variables are passed by the psiturk server process
 var mycounterbalance = counterbalance;  // they tell you which condition you have been assigned to
                                         // they are not used in the stroop code but may be useful to you
 
+// Debuging test set or set from
+var debug = true;
+if (debug) {
+	// Overwrites the loaded data;
+	
+	var train_set = [{boxes: "CD" ,
+					 yield: false ,
+			    	 order: 1   },
+
+			    	{boxes: "CD" ,
+					 yield: true ,
+			    	 order: -1   },
+	];
+
+	var test_set = [{boxes: "AB" ,
+					 yield: true ,
+			    	 order: 1   },
+
+			    	{boxes: "CD" ,
+					 yield: true ,
+			    	 order: -1   },
+
+			        {boxes: "AD",
+			         yield: true,
+			         order: -1  },
+
+			        {boxes: "BC" ,
+			         yield: false,
+			         order: 1    }
+	];
+};
+
+var box_images  = {boxA: "/static/images/boxA.jpg",
+				   boxB: "/static/images/boxB.jpg",
+				   boxC: "/static/images/boxC.jpg",
+				   boxD: "/static/images/boxD.jpg"};
+
+var goal_images = ["/static/images/goal1.png",
+				   "/static/images/goal2.png",
+				   "/static/images/goal3.png"];
+
 // All pages to be loaded after Ad page which, accepted, splashes to consent page. 
-var pages = [
-	"instruct-desc.html",
-	"instruct-ex-exp.html",
-	"instruct-ex-form.html",
-	"stage.html",
-	"questionnaire.html"
-];
+var pages = ["instruct.html","stage_inst.html","recap.html","stage.html","train_test_partition.html","questionnaire.html"];
 
-var images = ["/static/images/lit.jpg",
-              "/static/images/normal.jpg",
-              "/static/images/indOn.jpg",
-	      "/static/images/indOff.jpg"
-];
+psiTurk.preloadPages (pages);
+psiTurk.preloadImages(box_images);
+psiTurk.preloadImages(goal_images);
+psiTurk.preloadImages(["/static/images/fixation.jpg"]);
 
-psiTurk.preloadPages(pages);
-psiTurk.preloadImages(images);
-
-var instructionPages = ["instruct-desc.html",
-	                "instruct-ex-exp.html",
-	                "instruct-ex-form.html",
-	               ];
+var instructionPages = ["instruct.html","stage_inst.html","recap.html"];
 
 // Task object to keep track of the current phase
 var currentview;
@@ -42,8 +64,14 @@ var currentview;
  ******************/
 $(window).load( function(){
     psiTurk.doInstructions(
-    	instructionPages, 						       // a list of pages you want to display in function
-    	function() { currentview = new experiment(); } // what you want to do when you are done with instructions
+        instructionPages,
+        function() {
+        	currentview = new experiment(train_set,box_images,goal_images,"train");
+        	//currentview = new experiment(train_set,box_images,goal_images,"learn")
+        }
     );
-});
+         //,
 
+        //function() { currentview = new experiment(train_set,box_images,goal_images,"learn");},
+        //function() { currentview = new experiment(test_set ,box_images,goal_images,"test" );}
+});
