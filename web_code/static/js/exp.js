@@ -48,7 +48,7 @@ var experiment = function(task_set,box_images,goal_images,phase) {
 		if (phase == "inst") {
 			d3.select("#img0").remove();
 			d3.select("#img1").remove();
-			d3.select("#header").html("Sorry, you took to long!")
+			d3.select("#header").html("Sorry, you took too long!")
 			d3.select("#prompt").html("Please respond faster next time. <br> In the experiment you won't be notified, the next cycle will just start.")
 	
 			d3.select("#okbutton").style("display","inline");
