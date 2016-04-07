@@ -1,5 +1,10 @@
+# General Rules
 .psiturk*
 *.db
 *.log
-config.txt
 *.m~
+
+# Particular Files
+config.txt
+custom.pyc
+dumpDB.out

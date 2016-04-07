@@ -6,7 +6,7 @@ var experiment = function(task_set,box_images,goal_images,phase) {
 	var too_late_timer;
 
 	// Initial setup. Since updateAvial will be called, goal_avail will be [0,1] at first presentation.
-	var subphase    = "goals";
+	var subphase    = !(phase == 'test') ? "goals":"boxes";
 	var listening   = false;
 	var goal_avail  = [0,2];
 	var selection   = 1;					// Left item -> 0, right item -> 1
@@ -38,6 +38,11 @@ var experiment = function(task_set,box_images,goal_images,phase) {
 				break;
 		}
 	};
+
+	function tearDown(){
+
+	}
+
 
 	// This runs when a participant runs out of time on a non-goal trial.
 	function expireUI(){
@@ -161,7 +166,7 @@ var experiment = function(task_set,box_images,goal_images,phase) {
 			task_set.push(updateTrainingTask(cur_task))
 		};
 
-		if (responded) {
+		if (responded && !(phase == 'test')) {
 			subphase = (subphase == "goals") ? "boxes":"goals";
 		}
 		else {
@@ -172,7 +177,7 @@ var experiment = function(task_set,box_images,goal_images,phase) {
 			if (subphase == "goals") {
 				goal_picked = Math.floor(Math.random()*2);
 			};
-			subphase = "goals";
+			subphase = !(phase == "test") ? "goals":"boxes";				
 		};
 
 		setTimeout(function(){
