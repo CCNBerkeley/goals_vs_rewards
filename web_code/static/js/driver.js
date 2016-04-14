@@ -6,7 +6,7 @@ var mycounterbalance = counterbalance;  // they tell you which condition you hav
                                         // they are not used in the stroop code but may be useful to you
 
 // Debuging test set or set from
-var debug = true;
+var debug = false;
 if (debug) {
 	// Overwrites the loaded data;
 	
