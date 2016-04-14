@@ -11,6 +11,7 @@ var experiment = function(task_set,box_images,goal_images,phase) {
 	var goal_avail  = [0,2];
 	var selection   = 1;					// Left item -> 0, right item -> 1
 	var goal_picked = 1;
+	var first_round = true;
 
 	if (phase == 'inst') {
 		var task_set = [{boxes: "AB" ,
@@ -20,7 +21,7 @@ var experiment = function(task_set,box_images,goal_images,phase) {
 		var resp_count  = 0;  				// How many times in a row has the subject responded in time?
 		var resp_fail   = 0;  				// How many times in a row has the subject failed to respond?
 		var gets_it = false;				// Is the subject ready to move on?
-		var resp_thresh = 4;			    // Declare ready to continue if resp_count >= resp_thresh.
+		var resp_thresh = 3;			    // Declare ready to continue if resp_count >= resp_thresh.
 	};
 	
 	// This updates the goals which will be displayed as availabe choices.
@@ -54,7 +55,7 @@ var experiment = function(task_set,box_images,goal_images,phase) {
 			d3.select("#img0").remove();
 			d3.select("#img1").remove();
 			d3.select("#header").html("Sorry, you took too long!")
-			d3.select("#prompt").html("Please respond faster next time. <br> In the experiment you won't be notified, the next cycle will just start.")
+			d3.select("#prompt").html("Please respond faster next time.")
 	
 			d3.select("#okbutton").style("display","inline");
 	
@@ -65,7 +66,22 @@ var experiment = function(task_set,box_images,goal_images,phase) {
 			});
 		}
 		else {
-			recordAndContinue(resp_time,response,phase);
+			d3.select("#img0").remove();
+			d3.select("#img1").remove();
+
+			d3.select('#header').style("visibility","visible");
+			d3.select('#prompt').style("visibility","visible");
+
+			d3.select("#header").html("Sorry, you took too long!")
+			d3.select("#prompt").html("Please respond faster next time.<br> The next cycle will begin momentarily.")
+
+			var wait_time = (subphase == 'goals') ? 4500:1500;
+
+			setTimeout(function(){
+				d3.select('#header').style("visibility","hidden");
+				d3.select('#prompt').style("visibility","hidden");
+				recordAndContinue(resp_time,response,phase)
+			},wait_time);
 		};
 		//setTimeout(function(){
 		//	var resp_time = -1;
@@ -77,7 +93,7 @@ var experiment = function(task_set,box_images,goal_images,phase) {
 	function recordAndContinue(resp_time,response,phase){
 		var responded = resp_time > 0;		     	// Did the subject respond?
 
-		var chosen_duration = 0.5*1000;				// Time for which the chosen item is shown
+		var chosen_duration = 1.0*1000;				// Time for which the chosen item is shown
 		var total_duration  = chosen_duration;      // In case of goals subphase, otherwise more (added to later)
 
 		var fix_duration    = (subphase == "boxes") ? 0.5*1000:1;	// Fixation period length
@@ -105,7 +121,11 @@ var experiment = function(task_set,box_images,goal_images,phase) {
 					var correct = ((cur_order == 1 && response == 0) || (cur_order == -1 && response == 1));
 					var reward  = (rew_corr_choice && correct) || (!rew_corr_choice && !correct);
 
-					if (phase == 'inst') {resp_count++; resp_fail = 0}
+					if (phase == 'inst') {
+						resp_count++;
+						resp_fail = 0;
+						first_round = false;
+					}
 					break;
 			}
 
@@ -215,7 +235,13 @@ var experiment = function(task_set,box_images,goal_images,phase) {
 		choice_start = new Date().getTime();
 		listening = true;
 		//if (subphase == "boxes"){
-			too_late_timer = setTimeout(expireUI,2000);
+		if (phase == "inst" && first_round){
+			var wait_time = 20000;
+		}
+		else {
+			var wait_time = 2000;
+		};
+		too_late_timer = setTimeout(expireUI,wait_time);
 		//}
 	};
 
