@@ -20,7 +20,7 @@ var experiment = function(task_set,box_images,goal_images,phase) {
 		var resp_count  = 0;  				// How many times in a row has the subject responded in time?
 		var resp_fail   = 0;  				// How many times in a row has the subject failed to respond?
 		var gets_it = false;				// Is the subject ready to move on?
-		var resp_thresh = 1;			    // Declare ready to continue if resp_count >= resp_thresh.
+		var resp_thresh = 4;			    // Declare ready to continue if resp_count >= resp_thresh.
 	};
 	
 	// This updates the goals which will be displayed as availabe choices.
