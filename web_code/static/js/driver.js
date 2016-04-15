@@ -6,7 +6,7 @@ var mycounterbalance = counterbalance;  // they tell you which condition you hav
                                         // they are not used in the stroop code but may be useful to you
 
 // Debuging test set or set from
-var debug = true;
+var debug = false;
 if (debug) {
 	// Overwrites the loaded data;
 	
@@ -42,9 +42,9 @@ var box_images  = {boxA: "/static/images/boxA.jpg",
 				   boxC: "/static/images/boxC.jpg",
 				   boxD: "/static/images/boxD.jpg"};
 
-var goal_images = ["/static/images/goal1.png",
-				   "/static/images/goal2.png",
-				   "/static/images/goal3.png"];
+var goal_images = ["/static/images/goal1.jpg",
+				   "/static/images/goal2.jpg",
+				   "/static/images/goal3.jpg"];
 
 // All pages to be loaded after Ad page which, accepted, splashes to consent page. 
 var pages = ["instruct.html","stage_inst.html","recap.html","stage.html","train_test_partition.html","questionnaire.html"];
