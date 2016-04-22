@@ -47,14 +47,21 @@ var goal_images = ["/static/images/goal1.jpg",
 				   "/static/images/goal3.jpg"];
 
 // All pages to be loaded after Ad page which, accepted, splashes to consent page. 
-var pages = ["instruct.html","stage_inst.html","recap.html","stage.html","train_test_partition.html","questionnaire.html"];
+var pages = ["instruct.html"    ,
+             "stage_inst.html"  ,
+             "box_survey_1.html",
+             "recap.html"       ,
+             "stage.html"       ,
+             "train_test_partition.html",
+             "box_survey_2.html",
+             "questionnaire.html"];
 
 psiTurk.preloadPages (pages);
 psiTurk.preloadImages(box_images);
 psiTurk.preloadImages(goal_images);
 psiTurk.preloadImages(["/static/images/fixation.jpg"]);
 
-var instructionPages = ["instruct.html","stage_inst.html","recap.html"];
+var instructionPages = ["instruct.html","box_survey_1.html","stage_inst.html","recap.html"];
 
 // Task object to keep track of the current phase
 var currentview;
