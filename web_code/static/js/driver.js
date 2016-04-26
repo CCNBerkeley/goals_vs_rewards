@@ -6,7 +6,7 @@ var mycounterbalance = counterbalance;  // they tell you which condition you hav
                                         // they are not used in the stroop code but may be useful to you
 
 // Debuging test set or set from
-var debug = false;
+var debug = true;
 if (debug) {
 	// Overwrites the loaded data;
 	
@@ -23,13 +23,13 @@ if (debug) {
 					 yield: true ,
 			    	 order: 1   },
 
-			    	{boxes: "CD" ,
-					 yield: true ,
-			    	 order: -1   },
+			    	//{boxes: "CD" ,
+					 //yield: true ,
+			    	 //order: -1   },
 
-			        {boxes: "AD",
-			         yield: true,
-			         order: -1  },
+			        //{boxes: "AD",
+			         //yield: true,
+			         //order: -1  },
 
 			        {boxes: "BC" ,
 			         yield: false,
@@ -47,13 +47,12 @@ var goal_images = ["/static/images/goal1.jpg",
 				   "/static/images/goal3.jpg"];
 
 // All pages to be loaded after Ad page which, accepted, splashes to consent page. 
-var pages = ["instruct.html"    ,
+var pages = ["box_survey.html"  ,
+			 "instruct.html"    ,
              "stage_inst.html"  ,
-             "box_survey_1.html",
              "recap.html"       ,
              "stage.html"       ,
              "train_test_partition.html",
-             "box_survey_2.html",
              "questionnaire.html"];
 
 psiTurk.preloadPages (pages);
@@ -61,7 +60,7 @@ psiTurk.preloadImages(box_images);
 psiTurk.preloadImages(goal_images);
 psiTurk.preloadImages(["/static/images/fixation.jpg"]);
 
-var instructionPages = ["instruct.html","box_survey_1.html","stage_inst.html","recap.html"];
+var instructionPages = ["instruct.html","stage_inst.html","recap.html"];
 
 // Task object to keep track of the current phase
 var currentview;
@@ -70,13 +69,8 @@ var currentview;
  * Run Task
  ******************/
 $(window).load( function(){
-    psiTurk.doInstructions(
-        instructionPages,
-        function() {
-        	currentview = new experiment(train_set,box_images,goal_images,"train");
-        	//currentview = new experiment(train_set,box_images,goal_images,"learn")
-        }
-    );
+	currentview = new box_survey(instructionPages,1)
+
          //,
 
         //function() { currentview = new experiment(train_set,box_images,goal_images,"learn");},

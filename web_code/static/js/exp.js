@@ -388,7 +388,7 @@ var experiment = function(task_set,box_images,goal_images,phase) {
 	        	break;
 
 			case 'test':
-		    	currentview = new Questionnaire();
+		    	currentview = new box_survey([],2);
 		    	break;
         }
 	};
