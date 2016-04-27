@@ -4,6 +4,7 @@
 var box_survey = function(instructionPages,instance_number) {
 
 
+	// Set variables which depend on whether this is pre or post task set.
 	if (instance_number == 1){
 		var phase = 'box_survey_pre'
 		var instruct_html = "<h1>Pre-Study Survey</h1> <hr> <p> Before proceeding, please indicate any unconsidered (i.e. \"gut\") preferences you have for the boxes below.</p>"
@@ -15,18 +16,19 @@ var box_survey = function(instructionPages,instance_number) {
 
 	var error_message = "<h1>Oops!</h1><p>Something went wrong submitting your HIT. This might happen if you lose your internet connection. Press the button to resubmit.</p><button id='resubmit'>Resubmit</button>";
 
-	record_responses = function() {
 
+
+	// Function for saving user responses.
+	record_responses = function() {
 		psiTurk.recordTrialData({'phase':phase, 'status':'submit'});
 
-		// $('input').each( function(i, val) {
-		// 	psiTurk.recordUnstructuredData(this.id, this.value);		
-		// });
 		$('select').each( function(i, val) {
 			psiTurk.recordUnstructuredData(this.id, this.value);		
 		});
 	};
 
+
+	// Functions for resubmitting after failed submit.
 	prompt_resubmit = function() {
 		replaceBody(error_message);
 		$("#resubmit").click(resubmit);
@@ -37,13 +39,39 @@ var box_survey = function(instructionPages,instance_number) {
 		reprompt = setTimeout(prompt_resubmit, 10000);
 		
 		psiTurk.saveData({
-			success: function() {
-			    clearInterval(reprompt); 
-                psiTurk.computeBonus('compute_bonus', function(){finish()}); 
-			}, 
-			error: prompt_resubmit
+			success: success_function,
+			error  : prompt_resubmit
 		});
 	};
+
+
+	// What to do if the submission is successful
+	succuss_function = function() {
+    	if (instance_number == 1){ 
+		    psiTurk.doInstructions(
+		        instructionPages,
+		        function() {currentview = new experiment(train_set,box_images,goal_images,"train")}
+		    )
+    	}
+    	else {
+    		currentview = new Questionnaire();
+    	}
+    }
+
+
+	// Function for checking the form is filled out.
+	function formcheck() {
+		var fields  = $(".ss-item-required").find("input").serializeArray();
+		var success = (fields.length == 4)
+
+		if (!success){alert("Please rate each item.")}
+
+		return success
+	}
+
+
+
+
 
 	// Load the questionnaire snippet 
 	psiTurk.showPage('box_survey.html');
@@ -56,35 +84,12 @@ var box_survey = function(instructionPages,instance_number) {
 		if (success) {
 		    record_responses();
 		    psiTurk.saveData({
-	            
-	            success: function(){
-	            	if (instance_number == 1){ 
-					    psiTurk.doInstructions(
-					        instructionPages,
-					        function() {
-					        	currentview = new experiment(train_set,box_images,goal_images,"train");
-					        	//currentview = new experiment(train_set,box_images,goal_images,"learn")
-					    	}
-					    )
-	            	}
-	            	else {
-			    		currentview = new Questionnaire();
-	            	}
-	            
-	            }, // for some reason when prompt_resubmit gets triggered below, replaceBody can't be found ...
-	            error: prompt_resubmit
+	            success: succuss_function,
+	            error  : prompt_resubmit
 	        });
 		}
 	});
-    
-	
+
 };
 
-function formcheck() {
-  var fields = $(".ss-item-required").find("input").serializeArray();
-  var success = (fields.length == 4)
 
-  if (!success){alert("Please rate each item.")}
-
-  return success
-}
