@@ -5,56 +5,34 @@ var mycondition      = condition;       // these two variables are passed by the
 var mycounterbalance = counterbalance;  // they tell you which condition you have been assigned to
                                         // they are not used in the stroop code but may be useful to you
 
-// Debuging test set or set from
+// Debugging flag changes multiple aspects of the code.
 var debug = true;
+
 if (debug) {
 	// Overwrites the loaded data;
-	
-	var train_set = [{boxes: "CD" ,
-					 yield: false ,
-			    	 order: 1   },
-
-			    	{boxes: "CD" ,
-					 yield: true ,
-			    	 order: -1   },
-	];
-
-	var test_set = [{boxes: "AB" ,
-					 yield: true ,
-			    	 order: 1   },
-
-			    	//{boxes: "CD" ,
-					 //yield: true ,
-			    	 //order: -1   },
-
-			        //{boxes: "AD",
-			         //yield: true,
-			         //order: -1  },
-
-			        {boxes: "BC" ,
-			         yield: false,
-			         order: 1    }
-	];
+	train_set = debug_train_set
+   test_set  = debug_test_set
 };
 
-var box_images  = {boxA: "/static/images/boxA.jpg",
-				   boxB: "/static/images/boxB.jpg",
-				   boxC: "/static/images/boxC.jpg",
-				   boxD: "/static/images/boxD.jpg"};
+var box_images = {boxA: "/static/images/boxA.jpg",
+                  boxB: "/static/images/boxB.jpg",
+				      boxC: "/static/images/boxC.jpg",
+				      boxD: "/static/images/boxD.jpg"};
 
 var goal_images = ["/static/images/goal1.jpg",
-				   "/static/images/goal2.jpg",
-				   "/static/images/goal3.jpg"];
+				       "/static/images/goal2.jpg",
+				       "/static/images/goal3.jpg"];
 
 // All pages to be loaded after Ad page which, accepted, splashes to consent page. 
 var pages = ["box_survey.html"  ,
-			 "instruct.html"    ,
+			    "instruct.html"    ,
              "stage_inst.html"  ,
              "recap.html"       ,
              "stage.html"       ,
-             "train_test_partition.html",
+             "partition.html"   ,
              "questionnaire.html"];
 
+// Preload various things.
 psiTurk.preloadPages (pages);
 psiTurk.preloadImages(box_images);
 psiTurk.preloadImages(goal_images);
@@ -65,14 +43,5 @@ var instructionPages = ["instruct.html","stage_inst.html","recap.html"];
 // Task object to keep track of the current phase
 var currentview;
 
-/*******************
- * Run Task
- ******************/
-$(window).load( function(){
-	currentview = new box_survey(instructionPages,1)
-
-         //,
-
-        //function() { currentview = new experiment(train_set,box_images,goal_images,"learn");},
-        //function() { currentview = new experiment(test_set ,box_images,goal_images,"test" );}
-});
+// Run Task
+$(window).load( function(){ currentview = new box_survey(instructionPages,'pre_task_call') });

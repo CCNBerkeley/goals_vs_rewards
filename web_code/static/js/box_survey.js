@@ -1,22 +1,22 @@
 /****************
 * Questionnaire *
 ****************/
-var box_survey = function(instructionPages,instance_number) {
+var box_survey = function(instructionPages,call_time) {
 
 
 	// Set variables which depend on whether this is pre or post task set.
-	if (instance_number == 1){
-		var phase = 'box_survey_pre'
-		var instruct_html = "<h1>Pre-Study Survey</h1> <hr> <p> Before proceeding, please indicate any unconsidered (i.e. \"gut\") preferences you have for the boxes below.</p>"
+	if (call_time == 'pre_task_call'){
+		var phase        = 'box_survey_pre'
+		var header_inner = 'Pre-Study Survey'
+		var prompt_inner = 'Before proceeding, please indicate any unconsidered (i.e. \"gut\") preferences you have for the boxes below.'
 	}
 	else{
-		var phase = 'box_survey_post'
-		var instruct_html = "<h1>Post-Study Survey</h1> <hr> <p> As before, please indicate gut preferences you have for the boxes below.</p>"
+		var phase        = 'box_survey_post'
+		var header_inner = 'Post-Study Survey'
+		var prompt_inner = 'As before, please indicate gut preferences you have for the boxes below.'
 	};
 
-	var error_message = "<h1>Oops!</h1><p>Something went wrong submitting your HIT. This might happen if you lose your internet connection. Press the button to resubmit.</p><button id='resubmit'>Resubmit</button>";
-
-
+	var error_message = "<h1>Oops!</h1> <p>Something went wrong submitting your HIT. This might happen if you lose your internet connection. Press the button to resubmit.</p><button id='resubmit'>Resubmit</button>";
 
 	// Function for saving user responses.
 	record_responses = function() {
@@ -47,10 +47,10 @@ var box_survey = function(instructionPages,instance_number) {
 
 	// What to do if the submission is successful
 	succuss_function = function() {
-    	if (instance_number == 1){ 
-		    psiTurk.doInstructions(
-		        instructionPages,
-		        function() {currentview = new experiment(train_set,box_images,goal_images,"train")}
+    	if (call_time == 'pre_task_call'){ 
+    		psiTurk.doInstructions(
+		      instructionPages,
+		      function() {currentview = new experiment(train_set,box_images,goal_images,"train")}
 		    )
     	}
     	else {
@@ -70,14 +70,16 @@ var box_survey = function(instructionPages,instance_number) {
 	}
 
 
-
-
-
 	// Load the questionnaire snippet 
 	psiTurk.showPage('box_survey.html');
-	d3.select('#instructions').html(instruct_html)
+
+	d3.select('#header').html(header_inner)
+	d3.select('#prompt').html(prompt_inner)
+	
 	psiTurk.recordTrialData({'phase':phase, 'status':'begin'});
 	
+
+	// Bind submit key
 	$("#submit").click(function () {
 		var success = formcheck()
 
