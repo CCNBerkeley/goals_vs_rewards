@@ -35,6 +35,8 @@ var Questionnaire = function() {
 		});
 	};
 
+   var bonus = computeBonus()
+
 	// Load the questionnaire snippet 
 	psiTurk.showPage('questionnaire.html');
 	psiTurk.recordTrialData({'phase':'questionnaire', 'status':'begin'});

@@ -14,18 +14,18 @@ if (debug) {
    test_set  = debug_test_set
 };
 
-var box_images = {boxA: "/static/images/boxA.jpg",
-                  boxB: "/static/images/boxB.jpg",
-				      boxC: "/static/images/boxC.jpg",
-				      boxD: "/static/images/boxD.jpg"};
+var box_images = {box1: "/static/images/box1.jpg",
+                  box2: "/static/images/box2.jpg",
+    				      box3: "/static/images/box3.jpg",
+    				      box4: "/static/images/box4.jpg"};
 
 var goal_images = ["/static/images/goal1.jpg",
 				       "/static/images/goal2.jpg",
 				       "/static/images/goal3.jpg"];
 
 // All pages to be loaded after Ad page which, accepted, splashes to consent page. 
-var pages = ["box_survey.html"  ,
-			    "instruct.html"    ,
+var pages = ["survey.html"  ,
+			       "instruct.html"    ,
              "stage_inst.html"  ,
              "recap.html"       ,
              "stage.html"       ,
@@ -44,4 +44,4 @@ var instructionPages = ["instruct.html","stage_inst.html","recap.html"];
 var currentview;
 
 // Run Task
-$(window).load( function(){ currentview = new box_survey(instructionPages,'pre_task_call') });
+$(window).load( function(){ currentview = new survey(instructionPages,'goal_survey_pre') });
