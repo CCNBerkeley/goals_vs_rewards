@@ -13,13 +13,13 @@ var debug_test_set = [
    yield: true ,
    order: 1   },
 
-  //{boxes: "CD" ,
-  //yield: true ,
-  //order: -1   },
+  {boxes: "CD" ,
+   yield: true ,
+   order: -1   },
 
-  //{boxes: "AD",
-  //yield: true,
-  //order: -1  },
+  {boxes: "AD",
+   yield: true,
+   order: -1  },
 
   {boxes: "BC" ,
    yield: false,

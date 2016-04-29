@@ -45,7 +45,7 @@ var survey = function(instructionPages,page) {
 			};
 
 			var html_img   = '<img src="/static/images/' + html_img_prefix + i + '.jpg">'
-			var html_div   = '<div class="ss-item-required-' + i + '"> </div>' 
+			var html_div   = '<div class="ss-item-required-' + i + '"> </div> <br>' 
 			var html_table = '<table> <tr> <td id="img-td"> ' + html_img + ' </td> <td id="input-td-' + i +'"> </td> </tr> </table>'
 
 			$('#survey').append(html_div)

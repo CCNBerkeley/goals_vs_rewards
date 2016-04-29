@@ -3,6 +3,8 @@
 *.db
 *.log
 *.m~
+*.tsv
+*.swp
 
 # Particular Files
 config.txt
