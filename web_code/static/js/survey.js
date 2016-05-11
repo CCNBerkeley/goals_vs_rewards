@@ -52,7 +52,7 @@ var survey = function(instructionPages,page) {
 			$('.ss-item-required-' + i).append(html_table)
 
 			for (var j=0; j < 5; j++) {
-				var html_input = '<input type="radio" name="input' + i +'" value="' + j + '">' + labels[j] + '<br>'
+				var html_input = '<input type="radio" name="' + page +'-input' + i +'" value="' + j + '">' + labels[j] + '<br>'
 				$('#input-td-' + i).append(html_input)
 			}
 		}
@@ -62,14 +62,28 @@ var survey = function(instructionPages,page) {
 	var error_message = "<h1>Oops!</h1> <p>Something went wrong submitting your HIT. This might happen if you lose your internet connection. Press the button to resubmit.</p><button id='resubmit'>Resubmit</button>";
 
 	// Function for saving user responses.
+//	record_responses = function() {
+//		psiTurk.recordTrialData({'phase':page, 'status':'submit'});
+
+//		$('input:checked').each( function(i, val) {
+//			psiTurk.recordUnstructuredData(this.name, this.value);		
+//		});
+//	};
 	record_responses = function() {
-		psiTurk.recordTrialData({'phase':page, 'status':'submit'});
+		var question_data = []
 
-		$('select').each( function(i, val) {
-			psiTurk.recordUnstructuredData(this.id, this.value);		
+		//psiTurk.recordTrialData({'phase':'questionnaire', 'status':'submit'});
+
+		$('input:checked').each( function(i, val) {
+			question_data.push(this.name + this.value)
+			// psiTurk.recordUnstructuredData(this.name, this.value);		
 		});
-	};
 
+      psiTurk.recordTrialData({'phase'    : page,
+                               'response' : question_data  ,
+                            	 'status'   : 'submit'}
+                              );
+	};
 
 	// Functions for resubmitting after failed submit.
 	prompt_resubmit = function() {
