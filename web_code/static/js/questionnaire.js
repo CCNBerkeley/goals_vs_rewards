@@ -33,7 +33,7 @@ var Questionnaire = function() {
       psiTurk.saveData({
          success: function() {
              clearInterval(reprompt); 
-                psiTurk.computeBonus('compute_bonus', function(){finish()}); 
+             psiTurk.completeHit(); 
          }, 
          error: prompt_resubmit
       });
@@ -51,9 +51,9 @@ var Questionnaire = function() {
        record_responses();
        psiTurk.saveData({
             success: function(){
-                  psiTurk.computeBonus('compute_bonus', function() {
+                  //psiTurk.computeBonus('compute_bonus.html', function() {
+                  alert('Thank you! Your bonus has been computed as $' + bonus)
                   psiTurk.completeHIT(); // when finished saving compute bonus, the quit
-                }); 
             }, // for some reason when prompt_resubmit gets triggered below, replaceBody can't be found ...
             error: prompt_resubmit});
    });

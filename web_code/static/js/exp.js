@@ -277,11 +277,19 @@ var experiment = function(task_set,box_images,goal_images,phase) {
          if (phase == 'inst') {resp_streak = 0}
       };
 
+      if (subphase == 'boxes') {
+         var box_record = box_img_subset;
+      }
+      else {
+         var box_record = '';
+      }
 
       // Record the trial data
       psiTurk.recordTrialData({'phase'     : phase,
                                'subphase'  : subphase,
                                'response'  : response,
+                               'goals'     : goals.getImages(),
+                               'boxes'     : box_record,
                                'correct'   : correct,
                                'reward'    : reward,
                                'resp_time' : resp_time}
@@ -378,34 +386,34 @@ var experiment = function(task_set,box_images,goal_images,phase) {
             cur_order       = cur_task.order;
             rew_corr_choice = cur_task.yield;
 
-            var box_img_subset = [];
+            box_img_subset = [];
             switch (cur_task.boxes.slice(0,1)) {
                case "A":
-                  box_img_subset[0] = box_images.box1;
+                  box_img_subset[0] = box_images[0];
                   break;
                case "B":
-                  box_img_subset[0] = box_images.box2;
+                  box_img_subset[0] = box_images[1];
                   break;
                case "C":
-                  box_img_subset[0] = box_images.box3;
+                  box_img_subset[0] = box_images[2];
                   break;
                case "D":
-                  box_img_subset[0] = box_images.box4;
+                  box_img_subset[0] = box_images[3];
                   break;
             }
 
             switch (cur_task.boxes.slice(1,2)) {
                case "A":
-                  box_img_subset[1] = box_images.box1;
+                  box_img_subset[1] = box_images[0];
                   break;
                case "B":
-                  box_img_subset[1] = box_images.box2;
+                  box_img_subset[1] = box_images[1];
                   break;
                case "C":
-                  box_img_subset[1] = box_images.box3;
+                  box_img_subset[1] = box_images[2];
                   break;
                case "D":
-                  box_img_subset[1] = box_images.box4;
+                  box_img_subset[1] = box_images[3];
                   break;
             }
 

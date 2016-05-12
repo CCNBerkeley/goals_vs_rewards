@@ -1,4 +1,4 @@
-function [ ] = gen_game_data( )
+function [ ] = gen_game_data(num_str)
 
 %-------------------------------------%
 % Control variables for this script:
@@ -11,7 +11,7 @@ target_dist_ab = 5/6; % ie 10/12
 target_dist_cd = 4/6; % ie  8/12
 
 num_min_set_reps = 2;
-data_filename = 'game_data.js';
+filename = ['condition_' num_str '_data'];
 %-------------------------------------%
 
 
@@ -88,22 +88,32 @@ end
 
 
 % Plot the training set characteristics
-subaxis(2,2,1)
+spacing = 0.03;
+padding = 0.03;
+margin  = 0.03;
+marginB = 0.03;
+
+figure();
+set(gcf,'Position',[42,54,1026,746])
+
+subaxis(2,2,1,'S',spacing,'P',padding,'M',margin,'MB',marginB)
 plot(dist_ab,'-o')
-title('Moving Avg. Reward Dist: AB')
+title('\bf{Moving Avg. Reward Dist: AB}')
 
-subaxis(2,2,2)
+subaxis(2,2,2,'S',spacing,'P',padding,'M',margin,'MB',marginB)
 plot(cons_ab,'-o')
-title('Consecutive Instances of Choice: AB')
+title('\bf{Consecutive Instances of Choice: AB}')
 
-subaxis(2,2,3)
+subaxis(2,2,3,'S',spacing,'P',padding,'M',margin,'MB',marginB)
 plot(dist_cd,'-o')
-title('Moving Avg. Reward Dist: CD')
+title('\bf{Moving Avg. Reward Dist: CD}')
 
-subaxis(2,2,4)
+subaxis(2,2,4,'S',spacing,'P',padding,'M',margin,'MB',marginB)
 plot(cons_cd,'-o')
-title('Consecutive Instances of Choice: CD')
+title('\bf{Consecutive Instances of Choice: CD}')
 
+figname = [filename '.jpg'];
+export_fig(figname)
 
 % Create the test set
 test = { ...
@@ -132,35 +142,35 @@ test = test(perm,:);
 
 
 % Write the data set to a game_data.js file
-fileID = fopen(data_filename,'w');
-fprintf(fileID,'%s','var train_set = [');
+fileID = fopen([filename '.json'],'w');
+fprintf(fileID,'%s','{"train_set": [');
 
 train_len = length(training);
 for i=1:train_len
-    object_str = [          '{boxes:'         training{i,1} ','];
-    object_str = [object_str 'yield:'         training{i,2}  ','];
-    object_str = [object_str 'order:' num2str(training{i,3}) '}'];
+    object_str = [          '{"boxes":'         training{i,1} ','];
+    object_str = [object_str '"yield":'         training{i,2}  ','];
+    object_str = [object_str '"order":' num2str(training{i,3}) '}'];
     fprintf(fileID,'%s',object_str);
     
     if i < train_len
         fprintf(fileID,'%s',',');
     end
 end
-fprintf(fileID,'%s\r\n','];');
-fprintf(fileID,'%s','var test_set = [');
+fprintf(fileID,'%s\r\n','],');
+fprintf(fileID,'%s','"test_set": [');
 
 test_len = length(test);
 for i=1:test_len
-    object_str = [          '{boxes:'         test{i,1} ','];
-    object_str = [object_str 'yield:'         test{i,2}  ','];
-    object_str = [object_str 'order:' num2str(test{i,3}) '}'];
+    object_str = [          '{"boxes":'         test{i,1} ','];
+    object_str = [object_str '"yield":'         test{i,2}  ','];
+    object_str = [object_str '"order":' num2str(test{i,3}) '}'];
     fprintf(fileID,'%s',object_str);
     
     if i < test_len
         fprintf(fileID,'%s',',');
     end
 end
-fprintf(fileID,'%s',']');
+fprintf(fileID,'%s',']}');
 fclose(fileID);
 
 end
