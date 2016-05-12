@@ -75,7 +75,7 @@ var survey = function(instructionPages,page) {
 		//psiTurk.recordTrialData({'phase':'questionnaire', 'status':'submit'});
 
 		$('input:checked').each( function(i, val) {
-			question_data.push(this.name + this.value)
+			question_data.push(this.name + ': ' + this.value)
 			// psiTurk.recordUnstructuredData(this.name, this.value);		
 		});
 
