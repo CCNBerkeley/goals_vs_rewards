@@ -33,9 +33,6 @@ def main(table_name):
     for metadatum in column_descs:
         column_names.append(metadatum['name'])
 
-    # Column of data to unpack
-    data_col_name = 'datastring'
-
     # Initialize data objects
     data_aux  = []
     data_strs = []
@@ -44,7 +41,7 @@ def main(table_name):
     for row in rows:
         if row['status'] in statuses and row['uniqueid'] not in exclude:
             # Save the data strings to be unpacked
-            data_strs.append(row[data_col_name])
+            data_strs.append(row['datastring'])
 
             # Save the auxiliary data.
             for key in column_names:
@@ -54,6 +51,13 @@ def main(table_name):
     # Let's make it a bit easier to work with:
     # parse each participant's datastring as json object
     # and take the 'data' sub-object
+#    data_alt = []
+#    for part in data_strs:
+#        data_alt.append(json.loads(part)['data'])
+#        data_alt.append(json.loads(part)['questiondata'])
+
+#    data_strs = data_alt
+#    data_qs   = [json.loads(part)['questiondata'] for part in data_strs]
     data_strs = [json.loads(part)['data'] for part in data_strs]
 
     # insert uniqueid field into trialdata in case it wasn't added

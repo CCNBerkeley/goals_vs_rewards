@@ -10,9 +10,9 @@ var experiment = function(task_set,box_images,goal_images,phase) {
    var listening   = false;
    
    // Initial setup. Since updateAvial will be called, goal_avail will be [0,1] at first presentation.
-   var response    = 'right';
-   var goal_avail  = [0,2];
-   
+   //var response    = 'right';
+   //var goal_avail  = [0,2];
+      
    var trials_done = []
    var key_list    = []
    var wait_times  = {'goals': 4500, 'boxes': 1500}
@@ -22,13 +22,70 @@ var experiment = function(task_set,box_images,goal_images,phase) {
       var task_set = [{boxes: "AB", yield: true , order: 1}];
       
       var resp_streak  = 0;            // How many times in a row has the subject responded in time?
-      var resp_thresh  = debug ? 0:3;  // Declare ready to continue if resp_streak >= resp_thresh.
+      var resp_thresh  = debug ? 1:3;  // Declare ready to continue if resp_streak >= resp_thresh.
       var first_round  = true;
    };
 
-   
+   var goals = new GoalObject();
+
+   // Constructor for the goal object:
+   // We should be able to get a selection ID from a response, and be able to tell the goal object
+   // to update itself based on our response, but that should be it.
+   function GoalObject(){
+
+      // Private fields
+      var images  = goal_images;
+      var indices = [0,2];
+      var order   = 0;
+      var dbg     = true;
+      var self    = this;
+
+      // Private method
+      function codeResponse(response){
+         return (response == 'left') ? 0:1;
+      }
+
+      // Create priveleged public methods
+      this.getSelectionId = function(response){
+         //console.log('response: ' + response)
+         //console.log('indices : ' + indices )
+         //console.log('order   : ' + order   )
+
+         var ordered_indices = indices.slice();
+         if (order == 1) {ordered_indices.reverse()};
+
+         var response_code   = codeResponse(response)
+         var selectionId     = ordered_indices[response_code]
+
+         //console.log('ordered_indices: ' + ordered_indices)
+         //console.log('response_code  : ' + response_code  )
+
+         return selectionId
+      }
+
+      this.updateGoals = function(response){
+         var index  = self.getSelectionId(response);
+         var setdif = [[1,2], [0,2], [0,1]];
+
+         indices = setdif[index];
+         order   = (order + 1) % 2
+      }
+
+      this.getImages = function(){
+         var output = [ images[indices[0]], images[indices[1]] ];
+         if (order == 1) {output.reverse()}
+
+         return output
+      }
+
+      this.getOrder = function() {return order}
+
+   }
+   var goal_response = 'right';
+
+
    // This updates the goals which will be displayed as availabe choices.
-   function updateAvail(response,goal_avail){
+/* function updateAvail(response,goal_avail){
       var index = (response == 'left') ? 0:1
 
       switch (goal_avail[index]) {
@@ -42,7 +99,10 @@ var experiment = function(task_set,box_images,goal_images,phase) {
             return [0,1];
             break;
       }
+      
+      if (debug){console.log(goal_avail)}
    };
+*/
 
    // This updates the display to admonish the user for not responding
    function admonish(){
@@ -154,7 +214,7 @@ var experiment = function(task_set,box_images,goal_images,phase) {
                var correct = -1
                var reward  = -1
 
-               picked_index = (response == 'left') ? 1:0
+               picked_index = (goal_response == 'left') ? 0:1
                break;
 
             case "boxes":
@@ -183,7 +243,8 @@ var experiment = function(task_set,box_images,goal_images,phase) {
          //   2) show the content of the box
          if (subphase == "boxes") {
 
-            var img_options = [goal_images[goal_avail[0]],goal_images[goal_avail[1]]];
+            var img_options = goals.getImages();
+            //var img_options = [goal_images[goal_avail[0]],goal_images[goal_avail[1]]];
             var box_content = (reward) ? img_options[picked_index]:img_options[(picked_index+1)%2];
 
             // Wait for chosen duration to end then show Result
@@ -225,6 +286,13 @@ var experiment = function(task_set,box_images,goal_images,phase) {
                                'reward'    : reward,
                                'resp_time' : resp_time}
                                );
+
+      //console.log('phase    : ' + phase    )
+      //console.log('subphase : ' + subphase )
+      //console.log('response : ' + response )
+      //console.log('correct  : ' + correct  )
+      //console.log('reward   : ' + reward   )
+      //console.log('resp_time: ' + resp_time)
 
       // Should we add more instruction tasks?
       var add_tasks = phase == 'inst' && resp_streak <= resp_thresh && subphase == 'boxes'
@@ -291,13 +359,15 @@ var experiment = function(task_set,box_images,goal_images,phase) {
             //   d3.select('#header'  ).style('visibility',"visible");
             //}
 
-            goal_avail = updateAvail(response,goal_avail)
-            var goals = [goal_images[goal_avail[0]], goal_images[goal_avail[1]]];
+            goals.updateGoals(goal_response)
+            //goal_avail = updateAvail(response,goal_avail)
+            //var goals = [goal_images[goal_avail[0]], goal_images[goal_avail[1]]];
+            var goal_images = goals.getImages();
 
-            if (phase == "inst" && Math.floor(Math.random()*2) == 1) {
-               goals = goals.reverse();
-            };
-            displayChoice(goals)
+            //if (phase == "inst" && Math.floor(Math.random()*2) == 1) {
+            //   goal_images = goal_images.reverse();
+            //};
+            displayChoice(goal_images)
          }
          else {
             if (phase == 'test') {trials_done.push(0)}
@@ -375,6 +445,10 @@ var experiment = function(task_set,box_images,goal_images,phase) {
             response = 'none';
             break;
       }
+      if (subphase == "goals") {
+         goal_response = response.slice();
+      }
+
       if (response != 'none') {
          var resp_time = new Date().getTime() - choice_start;
          listening     = false;
