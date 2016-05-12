@@ -2,13 +2,14 @@ from sqlalchemy import create_engine, MetaData, Table
 from sqlalchemy.orm import query
 import json
 import pandas as pd
-# import pdb
-# pdb.set_trace()
+import pdb
+pdb.set_trace()
 
 
-def main(table_name):
+def main(table_name, db_url):
     # DB program + :// + path from this file to the database
-    db_url = "sqlite:///participants.db"
+    # db_url = "sqlite:///participants.db"
+    #db_url = "mysql://ccnberkeley:CalBears@localhost/goals_vs_rewards"
 
     # Boilerplate sqlalchemy setup
     engine        = create_engine(db_url)
@@ -77,5 +78,7 @@ def main(table_name):
 
 if __name__ == "__main__":
     import sys
-    df = main(sys.argv[1])
-    df.to_csv(sys.argv[1] + '.tsv', sep='\t')
+    df = main(sys.argv[1], sys.argv[2])
+
+    db_name = sys.argv[2].split('/')[-1]
+    df.to_csv(db_name + '_' + sys.argv[1] + '.tsv', sep='\t')
