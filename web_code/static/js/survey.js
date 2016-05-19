@@ -14,7 +14,7 @@ var survey = function(instructionPages,page) {
 
 		case 'box_survey_post':
 			var header_inner = 'Post-Study Survey'
-			var prompt_inner = 'As before, please indicate gut preferences you have for the images below.'
+			var prompt_inner = 'Before proceeding, please indicate any unconsidered (i.e. \"gut\") preferences you have for the images below.'
 			var num_items_to_rate = 4
 			break
 
@@ -27,7 +27,7 @@ var survey = function(instructionPages,page) {
 
 		case 'goal_survey_post':
 			var header_inner = 'Post-Study Survey'
-			var prompt_inner = 'As before, please indicate gut preferences you have for the images below.'
+			var prompt_inner = 'Before proceeding, please indicate any unconsidered (i.e. \"gut\") preferences you have for the images below.'
 			var next_survey  = 'box_survey_pre'
 			var num_items_to_rate = 3
 			break

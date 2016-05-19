@@ -8,6 +8,8 @@ var experiment = function(task_set,box_images,goal_images,phase) {
 
    var subphase    = !(phase == 'test') ? "goals":"boxes";
    var listening   = false;
+
+   var waiting_for_key_up = false;
    
    // Initial setup. Since updateAvial will be called, goal_avail will be [0,1] at first presentation.
    //var response    = 'right';
@@ -76,6 +78,16 @@ var experiment = function(task_set,box_images,goal_images,phase) {
          if (order == 1) {output.reverse()}
 
          return output
+      }
+
+      this.getGoalNames = function(){
+         var goal_names = self.getImages();
+
+         // Extract just e.g. 'goal1' from full path & filename
+         goal_names[0] = goal_names[0].split("/")[goal_names[0].split("/").length-1].split(".")[0]
+         goal_names[1] = goal_names[1].split("/")[goal_names[1].split("/").length-1].split(".")[0] 
+         
+         return goal_names
       }
 
       this.getOrder = function() {return order}
@@ -284,16 +296,20 @@ var experiment = function(task_set,box_images,goal_images,phase) {
          var box_record = '';
       }
 
+      var trial_data = {'phase'    : phase,
+                        'subphase' : subphase,
+                        'response' : response,
+                        'goals'    : goals.getGoalNames(),
+                        'boxes'    : box_record}
+
+      if (responded) {
+         trial_data['correct'  ] = correct
+         trial_data['reward'   ] = reward
+         trial_data['resp_time'] = resp_time
+      }
+      
       // Record the trial data
-      psiTurk.recordTrialData({'phase'     : phase,
-                               'subphase'  : subphase,
-                               'response'  : response,
-                               'goals'     : goals.getImages(),
-                               'boxes'     : box_record,
-                               'correct'   : correct,
-                               'reward'    : reward,
-                               'resp_time' : resp_time}
-                               );
+      psiTurk.recordTrialData(trial_data);
 
       //console.log('phase    : ' + phase    )
       //console.log('subphase : ' + subphase )
@@ -484,12 +500,18 @@ var experiment = function(task_set,box_images,goal_images,phase) {
                                      'trials_done': trials_done}
                                      );
 
+            // Display the Test-Splash Page
+            /*
             psiTurk.showPage("partition.html");
             
             $('.okgotit').bind('click', function() {
                $('.okgotit').unbind('');
                currentview = new experiment(test_set,box_images,goal_images,"test" );
             });
+            */
+            
+            currentview = new experiment(test_set,box_images,goal_images,"test" );            
+
             break;
 
          case 'test':
@@ -510,7 +532,8 @@ var experiment = function(task_set,box_images,goal_images,phase) {
 
    // Register the response handler that is defined above to handle any
    // key down events.
-   $("body").focus().keydown(response_handler); 
+   //$("body").focus().keydown(response_handler); 
+   $("body").focus().keyup(response_handler); 
 
    // Start the test
    doNextStep();

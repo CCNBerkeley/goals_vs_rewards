@@ -28,43 +28,80 @@ function add(a, b) {
 
 // Bonus computation 
 function computeBonus(){
-   var data = psiTurk.getTrialData()
-   var summary = {}
-
-   // Find the summary data
-   for (var i=0; i < data.length; i++){
-      var cur_trial = data[i].trialdata
-
-      if (cur_trial.hasOwnProperty('key_list')) {
-         summary[cur_trial['phase']] = {'key_list': cur_trial['key_list'], 'trials_done': cur_trial['trials_done']}
-      }
-   }
-
-   var num_responses_train = summary['train']['trials_done'].reduce(add, 0)
-   var num_trials_train    = summary['train']['trials_done'].length
-
-   var num_responses_test  = summary['test']['trials_done'].reduce(add, 0)
-   var num_trials_test     = summary['test']['trials_done'].length
-
-   var frac_complete_train = num_responses_train / num_trials_train;
-   var frac_complete_test  = num_responses_test  / num_trials_test;
-   var frac_complete       = (num_responses_train + num_responses_test)/(num_trials_train + num_trials_test)
-
-   if (frac_complete < 0.75 || frac_complete_test < 0.75){
-      var bonus = 0
-      return bonus.toFixed(2)
-   }
-
    var max_bonus = 5.0
 
-   var wgt_train = 1
-   var wgt_test  = 1
-   var wgt_sum   = wgt_train + wgt_test
+   try {
+      var data = psiTurk.getTrialData()
+      var summary = {}
 
-   var bonus = (frac_complete_train*(wgt_train/wgt_sum) + frac_complete_test*(wgt_test/wgt_sum))*max_bonus
-   var bonus = Math.round(bonus*Math.pow(10,2))/Math.pow(10,2);
+      // Find the summary data
+      for (var i=0; i < data.length; i++){
+         var cur_trial = data[i].trialdata
 
-   return bonus.toFixed(2)
+         if (cur_trial.hasOwnProperty('key_list')) {
+            summary[cur_trial['phase']] = {'key_list': cur_trial['key_list'], 'trials_done': cur_trial['trials_done']}
+         }
+      }
+
+      // Get fractions completed
+      var num_responses_train = summary['train']['trials_done'].reduce(add, 0)
+      var num_trials_train    = summary['train']['trials_done'].length
+
+      var num_responses_test  = summary['test']['trials_done'].reduce(add, 0)
+      var num_trials_test     = summary['test']['trials_done'].length
+
+      var frac_complete_train = num_responses_train / num_trials_train;
+      var frac_complete_test  = num_responses_test  / num_trials_test;
+      var frac_complete       = (num_responses_train + num_responses_test)/(num_trials_train + num_trials_test)
+
+
+      // Return 0 if not enough completed
+      if (frac_complete < 0.75 || frac_complete_test < 0.75){
+         var bonus = 0
+         return bonus.toFixed(2)
+      }
+
+      
+      // Create a psuedo histogram of key-stroke streaks:
+      // Tally streaks of length 1 through 6, where 1 is not truly a streak and those > 6 are decomposed
+      var streak_hist   = [0,0,0,0,0,0]
+      var increment     = 0
+      var prev_response = summary['train']['key_list'][0]
+
+      for (var i=1; i < summary['train']['key_list'].length; i++){
+         if (increment == 6) {
+            streak_hist[5] ++
+            increment = 0
+         }
+
+         if (summary['train']['key_list'][i] == prev_response) {
+            increment ++
+         }
+         else {
+            streak_hist[increment] ++
+            increment = 0
+         }
+         prev_response = data[i]
+      }
+      streak_hist[Math.min(increment,5)] ++
+
+      // For every length 6 streak, decrement bonus amount by 6/num_trials_train
+      var bonus = bonus * (1 - streak_hist[5]*(6/num_trials_train))
+      
+      // Give only a fraction of this bonus, based on the fraction answered. 
+      var wgt_train = 1
+      var wgt_test  = 1
+      var wgt_sum   = wgt_train + wgt_test
+
+      var bonus = (frac_complete_train*(wgt_train/wgt_sum) + frac_complete_test*(wgt_test/wgt_sum)) *bonus
+      var bonus = Math.round(bonus*Math.pow(10,2))/Math.pow(10,2);
+
+      return bonus.toFixed(2)
+   }
+   catch(err){
+      psiTurk.recordTrialData({'phase': 'questionnaire','bonus_error': err.message});
+      return max_bonus.toFixed(2)
+   }
 }
 
 

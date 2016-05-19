@@ -1,5 +1,6 @@
 # General Rules
 .psiturk*
+/data_scripts/.ipynb*
 *.db
 *.log
 *.m~
