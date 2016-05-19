@@ -24,7 +24,7 @@ var experiment = function(task_set,box_images,goal_images,phase) {
       var task_set = [{boxes: "AB", yield: true , order: 1}];
       
       var resp_streak  = 0;            // How many times in a row has the subject responded in time?
-      var resp_thresh  = debug ? 1:3;  // Declare ready to continue if resp_streak >= resp_thresh.
+      var resp_thresh  = debug ? 1:2;  // Declare ready to continue if resp_streak >= resp_thresh.
       var first_round  = true;
    };
 

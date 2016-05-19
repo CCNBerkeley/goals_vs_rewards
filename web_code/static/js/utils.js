@@ -28,7 +28,7 @@ function add(a, b) {
 
 // Bonus computation 
 function computeBonus(){
-   var max_bonus = 5.0
+   var max_bonus = 1.0
 
    try {
       var data = psiTurk.getTrialData()
@@ -96,6 +96,10 @@ function computeBonus(){
       var bonus = (frac_complete_train*(wgt_train/wgt_sum) + frac_complete_test*(wgt_test/wgt_sum)) *bonus
       var bonus = Math.round(bonus*Math.pow(10,2))/Math.pow(10,2);
 
+      if (Number.isNaN(bonus)) {
+        psiTurk.recordTrialData({'phase': 'questionnaire','bonus_error': err.message});
+        bonus = 1
+      }
       return bonus.toFixed(2)
    }
    catch(err){
