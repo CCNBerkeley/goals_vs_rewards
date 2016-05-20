@@ -2,8 +2,8 @@ from sqlalchemy import create_engine, MetaData, Table
 from sqlalchemy.orm import query
 import json
 import pandas as pd
-import pdb
-pdb.set_trace()
+#import pdb
+#pdb.set_trace()
 
 
 def main(table_name, db_url):
