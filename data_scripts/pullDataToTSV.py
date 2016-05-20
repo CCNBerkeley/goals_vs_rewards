@@ -2,8 +2,8 @@ from sqlalchemy import create_engine, MetaData, Table
 from sqlalchemy.orm import query
 import json
 import pandas as pd
-# import pdb
-# pdb.set_trace()
+import pdb
+pdb.set_trace()
 
 
 def main(table_name, db_url):
@@ -73,12 +73,15 @@ def main(table_name, db_url):
 
     # Put all subjects' trial data into a dataframe object from the
     # 'pandas' python library: one option among many for analysis
-    return pd.DataFrame(data_strs)
+    return {'main_data': pd.DataFrame(data_strs), 'aux_data': pd.DataFrame(data_aux)}
 
 
 if __name__ == "__main__":
     import sys
-    df = main(sys.argv[1], sys.argv[2])
+    data = main(sys.argv[1], sys.argv[2])
 
     db_name = sys.argv[2].split('/')[-1]
-    df.to_csv(db_name + '_' + sys.argv[1] + '.tsv', sep='\t')
+
+    data['main_data'].to_csv(db_name + '_' + sys.argv[1] + '.tsv', sep='\t')
+    data['aux_data'].to_csv(db_name + '_' + sys.argv[1] + '_aux.tsv', sep='\t')
+

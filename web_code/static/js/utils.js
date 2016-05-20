@@ -39,7 +39,7 @@ function computeBonus(){
          var cur_trial = data[i].trialdata
 
          if (cur_trial.hasOwnProperty('key_list')) {
-            summary[cur_trial['phase']] = {'key_list': cur_trial['key_list'], 'trials_done': cur_trial['trials_done']}
+            summary[cur_trial['phase']] = {'key_list': cur_trial['key_list'], 'trials_done': cur_trial['trials_done'], 'trials_corr':cur_trial['trials_corr']}
          }
       }
 
@@ -61,16 +61,19 @@ function computeBonus(){
          return bonus.toFixed(2)
       }
 
+      // Get fraction correct
+      var frac_correct_train = summary['train']['trials_corr'].reduce(add,0) / summary['train']['trials_corr'].length
+
       
       // Create a psuedo histogram of key-stroke streaks:
       // Tally streaks of length 1 through 6, where 1 is not truly a streak and those > 6 are decomposed
-      var streak_hist   = [0,0,0,0,0,0]
+      var streak_hist   = [0,0,0,0,0,0,0,0,0,0]
       var increment     = 0
       var prev_response = summary['train']['key_list'][0]
 
       for (var i=1; i < summary['train']['key_list'].length; i++){
-         if (increment == 6) {
-            streak_hist[5] ++
+         if (increment == 10) {
+            streak_hist[9] ++
             increment = 0
          }
 
@@ -83,27 +86,29 @@ function computeBonus(){
          }
          prev_response = data[i]
       }
-      streak_hist[Math.min(increment,5)] ++
+      streak_hist[Math.min(increment,9)] ++
 
       // For every length 6 streak, decrement bonus amount by 6/num_trials_train
-      var bonus = bonus * (1 - streak_hist[5]*(6/num_trials_train))
+      var bonus = max_bonus * (1 - streak_hist[9]*(10/num_trials_train))
       
       // Give only a fraction of this bonus, based on the fraction answered. 
       var wgt_train = 1
       var wgt_test  = 1
       var wgt_sum   = wgt_train + wgt_test
 
-      var bonus = (frac_complete_train*(wgt_train/wgt_sum) + frac_complete_test*(wgt_test/wgt_sum)) *bonus
+      var bonus = (  frac_complete_train *(wgt_train /wgt_sum) * frac_correct_train
+                   + frac_complete_test  *(wgt_test  /wgt_sum)                     ) *bonus
+
       var bonus = Math.round(bonus*Math.pow(10,2))/Math.pow(10,2);
 
       if (Number.isNaN(bonus)) {
-        psiTurk.recordTrialData({'phase': 'questionnaire','bonus_error': err.message});
+        psiTurk.recordTrialData({'phase': 'questionnaire','bonus_error': 'bonus is NaN!'});
         bonus = 1
       }
       return bonus.toFixed(2)
-   }
-   catch(err){
-      psiTurk.recordTrialData({'phase': 'questionnaire','bonus_error': err.message});
+
+   } catch(e){
+      psiTurk.recordTrialData({'phase': 'questionnaire','bonus_error': e.message});
       return max_bonus.toFixed(2)
    }
 }

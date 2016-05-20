@@ -6,16 +6,16 @@ var experiment = function(task_set,box_images,goal_images,phase) {
    var choice_start;
    var too_late_timer;
 
-   var subphase    = !(phase == 'test') ? "goals":"boxes";
-   var listening   = false;
+   var subphase  = !(phase == 'test') ? "goals":"boxes";
+   var listening = false;
+   var keydown   = false;
 
-   var waiting_for_key_up = false;
-   
    // Initial setup. Since updateAvial will be called, goal_avail will be [0,1] at first presentation.
    //var response    = 'right';
    //var goal_avail  = [0,2];
       
    var trials_done = []
+   var trials_corr = []
    var key_list    = []
    var wait_times  = {'goals': 4500, 'boxes': 1500}
 
@@ -234,6 +234,7 @@ var experiment = function(task_set,box_images,goal_images,phase) {
                var reward  = (rew_corr_choice && correct) || (!rew_corr_choice && !correct);
 
                trials_done[trials_done.length-1] ++
+               trials_corr[trials_corr.length-1] = (correct) ? 1:0
 
                if (phase == 'inst') {
                   resp_streak ++;
@@ -303,9 +304,12 @@ var experiment = function(task_set,box_images,goal_images,phase) {
                         'boxes'    : box_record}
 
       if (responded) {
-         trial_data['correct'  ] = correct
-         trial_data['reward'   ] = reward
          trial_data['resp_time'] = resp_time
+         
+         if (subphase == 'boxes'){
+            trial_data['correct'  ] = correct
+            trial_data['reward'   ] = reward
+         }
       }
       
       // Record the trial data
@@ -357,6 +361,7 @@ var experiment = function(task_set,box_images,goal_images,phase) {
 
       choice_start = new Date().getTime();
       listening    = true;
+      keydown      = false;
 
       if (phase == "inst" && first_round){
          var time_limit = 20000;
@@ -376,6 +381,7 @@ var experiment = function(task_set,box_images,goal_images,phase) {
       else {
          if (subphase == "goals"){
             trials_done.push(0)
+            trials_corr.push(0)
             toggleFixation('inline')
             d3.select('#header'  ).html ("Please select an item.");
 
@@ -394,7 +400,10 @@ var experiment = function(task_set,box_images,goal_images,phase) {
             displayChoice(goal_images)
          }
          else {
-            if (phase == 'test') {trials_done.push(0)}
+            if (phase == 'test') {
+               trials_done.push(0)
+               trials_corr.push(0)
+            }
             toggleFixation('none')
 
             cur_task = task_set.shift();
@@ -456,6 +465,7 @@ var experiment = function(task_set,box_images,goal_images,phase) {
    var response_handler = function(event) {
 
       if (!listening) return;
+      if (event.type == 'keyup' && !keydown)  {console.log(keydown); return;}
       var response;
 
       switch (event.keyCode) {
@@ -473,8 +483,18 @@ var experiment = function(task_set,box_images,goal_images,phase) {
          goal_response = response.slice();
       }
 
+      if (event.type == 'keydown'){
+         resp_time = new Date().getTime() - choice_start;
+         keydown   = true
+         return
+      }
+
+      //if (event.type == 'keyup'){
+      //   keydown = false
+      //}
+
       if (response != 'none') {
-         var resp_time = new Date().getTime() - choice_start;
+         //var resp_time = new Date().getTime() - choice_start;
          listening     = false;
 
          clearTimeout(too_late_timer);
@@ -487,6 +507,7 @@ var experiment = function(task_set,box_images,goal_images,phase) {
    // and on to the questionaire.
    var finish = function() {
       $("body").unbind("keydown", response_handler); // Unbind keys
+      $("body").unbind("keyup"  , response_handler); // Unbind keys
 
       switch (phase) {
          case 'inst':
@@ -497,6 +518,7 @@ var experiment = function(task_set,box_images,goal_images,phase) {
          case 'train':
             psiTurk.recordTrialData({'phase'      : phase,
                                      'key_list'   : key_list,
+                                     'trials_corr': trials_corr,
                                      'trials_done': trials_done}
                                      );
 
@@ -517,6 +539,7 @@ var experiment = function(task_set,box_images,goal_images,phase) {
          case 'test':
             psiTurk.recordTrialData({'phase'      : phase,
                          'key_list'   : key_list,
+                         'trials_corr': trials_corr,
                          'trials_done': trials_done}
                          );
             currentview = new survey([],'goal_survey_post');
@@ -532,7 +555,7 @@ var experiment = function(task_set,box_images,goal_images,phase) {
 
    // Register the response handler that is defined above to handle any
    // key down events.
-   //$("body").focus().keydown(response_handler); 
+   $("body").focus().keydown(response_handler); 
    $("body").focus().keyup(response_handler); 
 
    // Start the test
