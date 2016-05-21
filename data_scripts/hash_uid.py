@@ -1,14 +1,15 @@
 import pandas as pd
 
+
 def main(tsv_name):
-   data_frame = pd.DataFrame.from_csv(tsv_name, sep="\t")
+    data_frame = pd.DataFrame.from_csv(tsv_name, sep="\t")
 
-   uids = data_frame['uniqueid'].unique()
-   for item in uids:
-      data_frame['uniqueid'].replace(item, str(hash(item)), inplace=True)
-      print('UniqueID and Hash: ', item, hash(item))
+    uids = data_frame['uniqueid'].unique()
+    for item in uids:
+        data_frame['uniqueid'].replace(item, str(hash(item)), inplace=True)
+        print('UniqueID and Hash: ', item, hash(item))
 
-   return data_frame
+    return data_frame
 
 if __name__ == "__main__":
     import sys
