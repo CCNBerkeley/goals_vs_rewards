@@ -17,7 +17,8 @@ var Questionnaire = function() {
 
       psiTurk.recordTrialData({'phase'    : 'questionnaire',
                                'response' : question_data  ,
-                               'status'   : 'submit'}
+                               'status'   : 'submit'       ,
+                               'time_stamp' : getFormattedDate()}
                               );
    };
 
@@ -45,7 +46,8 @@ var Questionnaire = function() {
    psiTurk.showPage('questionnaire.html');
    psiTurk.recordTrialData({'phase' :'questionnaire',
                             'status':'begin'        ,
-                            'bonus' : bonus});
+                            'bonus' : bonus         ,
+                            'time_stamp': getFormattedDate()});
    
    $("#submit").click(function () {
        record_responses();

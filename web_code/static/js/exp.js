@@ -13,6 +13,10 @@ var experiment = function(task_set,box_images,goal_images,phase) {
    // Initial setup. Since updateAvial will be called, goal_avail will be [0,1] at first presentation.
    //var response    = 'right';
    //var goal_avail  = [0,2];
+
+   if (phase == 'test') {
+      var prev_seen = []
+   }
       
    var trials_done = []
    var trials_corr = []
@@ -153,7 +157,7 @@ var experiment = function(task_set,box_images,goal_images,phase) {
          subphase = (subphase == "goals") ? "boxes":"goals";
       }
       else {
-         if (phase != "inst") {
+         if (phase == "train") {
             task_set.shift();
          }
          if (subphase == "goals") {
@@ -301,7 +305,8 @@ var experiment = function(task_set,box_images,goal_images,phase) {
                         'subphase' : subphase,
                         'response' : response,
                         'goals'    : goals.getGoalNames(),
-                        'boxes'    : box_record}
+                        'boxes'    : box_record,
+                        'time_stamp': getFormattedDate()}
 
       if (responded) {
          trial_data['resp_time'] = resp_time
@@ -403,6 +408,7 @@ var experiment = function(task_set,box_images,goal_images,phase) {
             if (phase == 'test') {
                trials_done.push(0)
                trials_corr.push(0)
+               prev_seen.push(0)
             }
             toggleFixation('none')
 
@@ -444,6 +450,11 @@ var experiment = function(task_set,box_images,goal_images,phase) {
 
             var box_options = (cur_order == 1) ? box_img_subset:box_img_subset.reverse();
 
+            // Check if this is a 'new' box pairing
+            if (phase == 'test') {
+               prev_seen[prev_seen.length-1] = (cur_task.boxes != 'AB' && cur_task.boxes != 'CD') ? 0:1
+            }
+               
             d3.select('#header').html ("Please select a box to look in.");
             displayChoice(box_options);
          }
@@ -519,7 +530,8 @@ var experiment = function(task_set,box_images,goal_images,phase) {
             psiTurk.recordTrialData({'phase'      : phase,
                                      'key_list'   : key_list,
                                      'trials_corr': trials_corr,
-                                     'trials_done': trials_done}
+                                     'trials_done': trials_done,
+                                     'time_stamp' : getFormattedDate()}
                                      );
 
             // Display the Test-Splash Page
@@ -540,7 +552,9 @@ var experiment = function(task_set,box_images,goal_images,phase) {
             psiTurk.recordTrialData({'phase'      : phase,
                          'key_list'   : key_list,
                          'trials_corr': trials_corr,
-                         'trials_done': trials_done}
+                         'prev_seen'  : prev_seen,
+                         'trials_done': trials_done,
+                         'time_stamp' : getFormattedDate()}
                          );
             currentview = new survey([],'goal_survey_post');
             break;
@@ -557,6 +571,8 @@ var experiment = function(task_set,box_images,goal_images,phase) {
    // key down events.
    $("body").focus().keydown(response_handler); 
    $("body").focus().keyup(response_handler); 
+
+   psiTurk.recordTrialData({'phase' : phase, 'time_stamp' : getFormattedDate()})
 
    // Start the test
    doNextStep();

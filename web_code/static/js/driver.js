@@ -1,5 +1,5 @@
 // Debugging flag changes multiple aspects of the code.
-var debug = false;
+var debug = true;
 
 // Initalize psiturk object
 var psiTurk = new PsiTurk(uniqueId, adServerLoc, mode);

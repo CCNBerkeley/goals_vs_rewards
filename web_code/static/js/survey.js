@@ -81,7 +81,8 @@ var survey = function(instructionPages,page) {
 
       psiTurk.recordTrialData({'phase'    : page,
                                'response' : question_data  ,
-                            	 'status'   : 'submit'}
+                            	 'status'   : 'submit'       ,
+                               'time_stamp': getFormattedDate()}
                               );
 	};
 
@@ -145,7 +146,7 @@ var survey = function(instructionPages,page) {
 	d3.select('#header').html(header_inner)
 	d3.select('#prompt').html(prompt_inner)
 	
-	psiTurk.recordTrialData({'phase':page, 'status':'begin'});
+	psiTurk.recordTrialData({'phase':page, 'status':'begin', 'time_stamp': getFormattedDate()});
 	
 
 	// Bind submit key
