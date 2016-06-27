@@ -9,27 +9,27 @@ var survey = function(instructionPages,page) {
 		case 'box_survey_pre':
 			var header_inner = 'Pre-Study Survey'
 			var prompt_inner = 'Before proceeding, please indicate any unconsidered (i.e. \"gut\") preferences you have for the images below.'
-			var num_items_to_rate = 4
+			var num_items_to_rate = 8
 			break
 
 		case 'box_survey_post':
 			var header_inner = 'Post-Study Survey'
 			var prompt_inner = 'Before proceeding, please indicate any unconsidered (i.e. \"gut\") preferences you have for the images below.'
-			var num_items_to_rate = 4
+			var num_items_to_rate = 8
 			break
 
 		case 'goal_survey_pre':
 			var header_inner = 'Pre-Study Survey'
 			var prompt_inner = 'Before proceeding, please indicate any unconsidered (i.e. \"gut\") preferences you have for the images below.'
 			var next_survey  = 'box_survey_pre'
-			var num_items_to_rate = 3
+			var num_items_to_rate = 5
 			break
 
 		case 'goal_survey_post':
 			var header_inner = 'Post-Study Survey'
 			var prompt_inner = 'Before proceeding, please indicate any unconsidered (i.e. \"gut\") preferences you have for the images below.'
 			var next_survey  = 'box_survey_pre'
-			var num_items_to_rate = 3
+			var num_items_to_rate = 5
 			break
 	}
 
@@ -39,12 +39,14 @@ var survey = function(instructionPages,page) {
 		for (var i=1; i <= num_items_to_rate; i++){
 			if (page.slice(0,3) == 'box') {
 				var html_img_prefix = 'box'
+				var offset = 0
 			}
 			else{
-				var html_img_prefix = 'goal'
+				var html_img_prefix = (i > 3) ? 'point':'goal'
+				var offset = (i > 3) ? -4:0
 			};
 
-			var html_img   = '<img src="/static/images/' + html_img_prefix + i + '.jpg">'
+			var html_img   = '<img src="/static/images/' + html_img_prefix + (i + offset) + '.jpg">'
 			var html_div   = '<div class="ss-item-required-' + i + '"> </div> <br>' 
 			var html_table = '<table> <tr> <td id="img-td"> ' + html_img + ' </td> <td id="input-td-' + i +'"> </td> </tr> </table>'
 
@@ -113,7 +115,7 @@ var survey = function(instructionPages,page) {
 			case 'box_survey_pre':
 	    		psiTurk.doInstructions(
 			      instructionPages,
-			      function() {currentview = new experiment(train_set,box_images,goal_images,"train")}
+			      function() {currentview = new experiment(train_set,images,"train")}
 			    )
 				break
 

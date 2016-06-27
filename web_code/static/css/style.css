@@ -26,6 +26,11 @@ strong {
   color: #ccccff;
 }
 
+textarea {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
 
 /* these are all the same for now, but easy to modify individually */
 #container-ad, #container-error, #container-exp, #container-consent, #container-instructions, #container-questionnaire {
