@@ -15,6 +15,8 @@ var Questionnaire = function() {
          // psiTurk.recordUnstructuredData(this.name, this.value);
       });
 
+      question_data.push('comments: ' + $('textarea').val())
+      
       psiTurk.recordTrialData({'phase'    : 'questionnaire',
                                'response' : question_data  ,
                                'status'   : 'submit'       ,
