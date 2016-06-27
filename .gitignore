@@ -6,8 +6,9 @@
 *.m~
 *.tsv
 *.swp
+config*
 
 # Particular Files
-config.txt
+**/.DS_Store
 custom.pyc
 dumpDB.out
