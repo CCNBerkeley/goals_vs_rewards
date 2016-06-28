@@ -1,7 +1,7 @@
 // Debugging flag changes multiple aspects of the code.
 var debug = false;
-var skip_surveys = true;
-var random_assoc = false;
+var skip_surveys = false;
+var random_assoc = true;
 
 // Initalize psiturk object
 var psiTurk = new PsiTurk(uniqueId, adServerLoc, mode);

@@ -17,7 +17,7 @@
     "order": -1   }
  ],
 "test_set": [
-  {"boxes": "AD",
+  {"boxes": "AB",
    "yield": true,
    "order": -1  },
 
@@ -29,7 +29,7 @@
    "yield": false,
    "order": 1    },
 
-  {"boxes": "CH" ,
+  {"boxes": "GH" ,
    "yield": false,
    "order": 1    }
  ]}

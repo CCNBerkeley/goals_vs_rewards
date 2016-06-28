@@ -8,8 +8,8 @@ var experiment = function(task_set,images,phase) {
    }
    
    // Initialize some tracking stuff
-   var trials_done = []
-   var trials_corr = []
+   var trials_done = [0]
+   var trials_corr = [0]
    var key_list    = []
 
    var admonition_duration  = {'goals': 4250, 'points':4250, 'boxes': 2000}
@@ -240,14 +240,6 @@ var experiment = function(task_set,images,phase) {
          // If we didn't finish, need to get rid of stuff
          display.clearDisplay()
 
-         if (phase == "test") {
-            //prev_seen.push(0)
-
-            // Check if this is a 'new' box pairing
-            //prev_seen[prev_seen.length-1] = (cur_task.boxes != 'AB' && cur_task.boxes != 'CD') ? 0:1
-            prev_seen.push( (cur_task.boxes != 'AB' && cur_task.boxes != 'CD') ? 0:1 )
-         }
-
          //
          display.showChoice( trial.getImages(), subphase );
          coordinator.listen( choice_time_limit )
@@ -280,6 +272,10 @@ var experiment = function(task_set,images,phase) {
          else{
             return goal_image_object.getImages()
          }
+      }
+
+      this.getCurTask = function(){
+         return cur_task
       }
 
       // A function to update the instruction task set.
@@ -510,6 +506,7 @@ var experiment = function(task_set,images,phase) {
 
             total_duration = total_duration + fix_duration;
          };
+
       }
       else {
          var correct = -1;
@@ -524,13 +521,13 @@ var experiment = function(task_set,images,phase) {
                         'boxes'    : trial.getBoxNames() ,
                         'time_stamp': getFormattedDate() }
 
-      if (responded) {
+      if (subphase == 'boxes'){
+         trial_data['correct'  ] = correct
+         trial_data['reward'   ] = reward
+      }
+
+      if (responded){
          trial_data['resp_time'] = resp_time
-         
-         if (subphase == 'boxes'){
-            trial_data['correct'  ] = correct
-            trial_data['reward'   ] = reward
-         }
       }
       
       // Record the trial data
@@ -542,6 +539,15 @@ var experiment = function(task_set,images,phase) {
       //console.log('correct  : ' + correct  )
       //console.log('reward   : ' + reward   )
       //console.log('resp_time: ' + resp_time)
+
+      if (phase == "test") {
+         //prev_seen.push(0)
+         var cur_task = trial.getCurTask()
+
+         // Check if this is a 'new' box pairing
+         //prev_seen[prev_seen.length-1] = (cur_task.boxes != 'AB' && cur_task.boxes != 'CD') ? 0:1
+         prev_seen.push( (cur_task.boxes != 'AB' && cur_task.boxes != 'CD' && cur_task.boxes != 'EF' && cur_task.boxes != 'GH') ? 0:1 )
+      }
 
       // Should we add more instruction tasks?
       var add_task_condition_generic  = phase == 'inst' && resp_streak <= resp_thresh
@@ -686,7 +692,7 @@ var experiment = function(task_set,images,phase) {
          }
 
          if (event.type == 'keydown'){
-            var resp_time = new Date().getTime() - choice_start_time;
+            resp_time = new Date().getTime() - choice_start_time;
             keydown = true
             return
          }
