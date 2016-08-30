@@ -38,7 +38,7 @@ def main(tsv_file):
 
         # Prepare figure of subplots if new uid
         if phase == 'train':
-            f, axarr = plt.subplots(3, 4, figsize=(18, 12))
+            f, axarr = plt.subplots(3, 4, figsize=(22, 12))
 
         matplotlib.rc('xtick', labelsize=8)
         matplotlib.rc('ytick', labelsize=8)
@@ -57,6 +57,10 @@ def main(tsv_file):
         # Plot the raw 'correct' data
         # -------------------------------------------------- #
         too_fast_mask = cur_phase['resp_time'] < 150
+        # boolean_correctness = copy(cur_phase['correct'])
+        cur_phase['correct'][cur_phase['correct'] == 'False'] = 0
+        cur_phase['correct'][cur_phase['correct'] == 'True' ] = 1
+        cur_phase['correct'][cur_phase['correct'] == '-1'   ] = 0
 
         indices = range(0, len(cur_phase['correct']))
         axarr[0, col].plot(
@@ -169,7 +173,8 @@ def main(tsv_file):
         # -------------------------------------------------- #
         # Create Box-Choice Bar Plots and Moving Averages
         # -------------------------------------------------- #
-        box_name_list = ['A', 'B', 'C', 'D']
+        box_name_list        = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
+        reward_probabilities = [0.8, 0.2, 0.6, 0.4, 0.8, 0.2, 0.6, 0.4]
 
         # Extract the box-image associations used.
         # Note: At least one user has submitted the pre-task survey more than
@@ -183,25 +188,42 @@ def main(tsv_file):
 
         box_img_list = copy(data_frame['box_images'][user_mask].iloc[index])
         box_img_list = json.loads(box_img_list.replace('\'', '"'))
+        for index in range (0, len(box_img_list)):
+            box_img_list[index] = box_img_list[index].split('/')[-1]
 
         # Moving on...
         if phase == 'train':
-            pair_list = ['AB', 'CD']
+            pair_list = ['AB', 'CD', 'EF', 'GH']
         else:
-            pair_list = ['AB', 'AC', 'AD', 'BC', 'BD', 'CD']
+            pair_list = ['AB', 'AC', 'AD', 'AE', 'AF', 'AG', 'AH',
+                               'BC', 'BD', 'BE', 'BF', 'BG', 'BH',
+                                     'CD', 'CE', 'CF', 'CG', 'CH',
+                                           'DE', 'DF', 'DG', 'DH',
+                                                 'EF', 'EG', 'EH',
+                                                       'FG', 'FH',
+                                                             'GH']
 
         # There are 3 possible choices per pair displayed:
         # Left, right, or neither, coded 0, 1, -1
-        nbins = len(pair_list) * 3
-        choice_bins = np.zeros(nbins)
+        nbins = len(pair_list)
+        # nbins = len(pair_list) * 3  #  Old
+        choice_bins = np.zeros(nbins*3)
 
         # Create the set of labels for the choice bins
         # These will be used shown on the bar plot
         labels = []
+        better_item_list = []
+
         for index in range(0, len(pair_list)):
-            labels.append(pair_list[index] + ':' + pair_list[index][0])
-            labels.append(pair_list[index] + ':' + pair_list[index][1])
-            labels.append(pair_list[index] + ':')
+            box_zero_label = pair_list[index][0]
+            box_one_label  = pair_list[index][1]
+
+            better_item_ind = 1 if reward_probabilities[box_name_list.index(box_one_label)] > reward_probabilities[box_name_list.index(box_zero_label)] else 0
+            better_item_list.append(better_item_ind)
+
+            labels.append(pair_list[index] + ':' + pair_list[index][better_item_ind])
+            # labels.append(pair_list[index] + ':' + pair_list[index][1])
+            # labels.append(pair_list[index] + ':')
 
         # Figure out which choice bin to increment and do so
         for index in range(0, len(box_resp_series)):
@@ -209,8 +231,8 @@ def main(tsv_file):
 
             disp_pair_str  = cur_phase['boxes'][box_mask].iloc[index]
             disp_pair_list = json.loads(disp_pair_str.replace('\'', '"'))
-            disp_pair_inds = [box_img_list.index(disp_pair_list[0]),
-                              box_img_list.index(disp_pair_list[1])]
+            disp_pair_inds = [box_img_list.index(disp_pair_list[0] + '.jpg'),
+                              box_img_list.index(disp_pair_list[1] + '.jpg')]
 
             sorted_disp_pair_inds = copy(disp_pair_inds)
             sorted_disp_pair_inds.sort()
@@ -230,17 +252,21 @@ def main(tsv_file):
             bin_ind = disp_list_ind * 3 + choice
             choice_bins[bin_ind] = choice_bins[bin_ind] + 1
 
+        better_item_inds = np.arange(0, nbins*3, 3) + better_item_list
         # Normalize the bins
-        for low_ind in range(0, nbins, 3):
+        for low_ind in range(0, nbins*3, 3):
             msk = np.arange(low_ind, low_ind + 3)
             choice_bins[msk] = choice_bins[msk]/sum(choice_bins[msk])
 
         axarr[1, col+1].bar(np.arange(0, nbins),
-                            choice_bins, tick_label=labels)
+                            choice_bins[better_item_inds], tick_label=labels, align='center')
         axarr[1, col+1].grid()
         axarr[1, col+1].set_title ('Box Choice Fractions: ' + phase)
         axarr[1, col+1].set_ylabel('% Response Chosen (by Bin)')
         axarr[1, col+1].set_xlabel('Pair Shown : Chosen')
+        axarr[1, col+1].set_xlim  (0, nbins)
+        # axarr[1, col+1].xticks(np.arange(0, nbins), labels, rotation='vertical')
+        plt.setp( axarr[1, col+1].xaxis.get_majorticklabels(), rotation=90)
 
         # -------------------------------------------------- #
         # Save the figure and close it
