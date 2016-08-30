@@ -216,12 +216,20 @@ def main(tsv_file):
 
         for index in range(0, len(pair_list)):
             box_zero_label = pair_list[index][0]
-            box_one_label  = pair_list[index][1]
+            box_zero_index = box_name_list.index(box_zero_label)
+            box_zero_prob  = reward_probabilities[box_zero_index]
 
-            better_item_ind = 1 if reward_probabilities[box_name_list.index(box_one_label)] > reward_probabilities[box_name_list.index(box_zero_label)] else 0
+            box_one_label  = pair_list[index][1]
+            box_one_index  = box_name_list.index(box_one_label)
+            box_one_prob   = reward_probabilities[box_one_index]
+
+            better_item_ind = 1 if box_one_prob > box_zero_prob else 0
+
             better_item_list.append(better_item_ind)
 
-            labels.append(pair_list[index] + ':' + pair_list[index][better_item_ind])
+            labels.append(
+                pair_list[index] + ':' + pair_list[index][better_item_ind]
+            )
             # labels.append(pair_list[index] + ':' + pair_list[index][1])
             # labels.append(pair_list[index] + ':')
 
@@ -258,14 +266,17 @@ def main(tsv_file):
             msk = np.arange(low_ind, low_ind + 3)
             choice_bins[msk] = choice_bins[msk]/sum(choice_bins[msk])
 
-        axarr[1, col+1].bar(np.arange(0, nbins),
-                            choice_bins[better_item_inds], tick_label=labels, align='center')
+        axarr[1, col+1].bar(
+            np.arange(0, nbins),
+            choice_bins[better_item_inds],
+            tick_label=labels,
+            align='center'
+            )
         axarr[1, col+1].grid()
         axarr[1, col+1].set_title ('Box Choice Fractions: ' + phase)
         axarr[1, col+1].set_ylabel('% Response Chosen (by Bin)')
         axarr[1, col+1].set_xlabel('Pair Shown : Chosen')
         axarr[1, col+1].set_xlim  (0, nbins)
-        # axarr[1, col+1].xticks(np.arange(0, nbins), labels, rotation='vertical')
         plt.setp( axarr[1, col+1].xaxis.get_majorticklabels(), rotation=90)
 
         # -------------------------------------------------- #
@@ -273,8 +284,9 @@ def main(tsv_file):
         # -------------------------------------------------- #
         if phase == 'test':
             # Save the figure
+            figname = 'plots_of_uid_' + uid_str + '.png'
             plt.tight_layout()
-            plt.savefig('uid_' + uid_str + '_plots.png', bbox_inches='tight')
+            plt.savefig(figname, bbox_inches='tight')
             plt.close()
 
 
