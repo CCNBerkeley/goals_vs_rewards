@@ -250,7 +250,12 @@ var experiment = function(task_set,images,phase) {
       }
 
       this.getGoalNames = function(){
-         return goal_image_object.getImageNames();
+         if (point_trial){
+            return point_image_object.getImageNames();
+         }
+         else{
+            return goal_image_object.getImageNames();
+         }
       }
 
       this.getBoxNames = function(){
