@@ -12,3 +12,4 @@ config*
 **/.DS_Store
 custom.pyc
 dumpDB.out
+data_scripts/data

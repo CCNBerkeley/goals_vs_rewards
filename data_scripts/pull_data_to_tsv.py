@@ -1,15 +1,27 @@
+"""
+This file contains a simple script for pulling the goals_vs_rewards data
+out of a database and into a tab seperated value file for further processing.
+
+Usage:
+    python pull_data_to_tsv.py table_name db_url
+
+Writes:
+    db_name_table_name.tsv
+    db_name_table_name_aux.tsv
+"""
+
 from sqlalchemy import create_engine, MetaData, Table
 from sqlalchemy.orm import query
 import json
 import pandas as pd
-#import pdb
-#pdb.set_trace()
+# import pdb
+# pdb.set_trace()
 
 
 def main(table_name, db_url):
     # DB program + :// + path from this file to the database
     # db_url = "sqlite:///participants.db"
-    #db_url = "mysql://ccnberkeley:CalBears@localhost/goals_vs_rewards"
+    # db_url = "mysql://ccnberkeley:CalBears@localhost/goals_vs_rewards"
 
     # Boilerplate sqlalchemy setup
     engine        = create_engine(db_url)
@@ -73,7 +85,8 @@ def main(table_name, db_url):
 
     # Put all subjects' trial data into a dataframe object from the
     # 'pandas' python library: one option among many for analysis
-    return {'main_data': pd.DataFrame(data_strs), 'aux_data': pd.DataFrame(data_aux)}
+    return {'main_data': pd.DataFrame(data_strs),
+            'aux_data': pd.DataFrame(data_aux)}
 
 
 if __name__ == "__main__":
@@ -84,4 +97,3 @@ if __name__ == "__main__":
 
     data['main_data'].to_csv(db_name + '_' + sys.argv[1] + '.tsv', sep='\t')
     data['aux_data'].to_csv(db_name + '_' + sys.argv[1] + '_aux.tsv', sep='\t')
-

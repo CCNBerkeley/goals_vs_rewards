@@ -122,8 +122,8 @@ var experiment = function(task_set,images,phase) {
       var cur_image_object = box_image_object
       var cur_choice_pair  = (phase == 'test') ? box_image_object.getImages():goal_image_object.getImages()
 
-      var response_object = {correctness: -1,
-                             gets_reward: -1,
+      var response_object = {correctness: null,
+                             gets_reward: null,
                              response   : 'none',
                              code       : function(response){ codeResponse(response) }
                             }
@@ -250,7 +250,12 @@ var experiment = function(task_set,images,phase) {
       }
 
       this.getGoalNames = function(){
-         return goal_image_object.getImageNames();
+         if (point_trial){
+            return point_image_object.getImageNames();
+         }
+         else{
+            return goal_image_object.getImageNames();
+         }
       }
 
       this.getBoxNames = function(){
@@ -305,8 +310,8 @@ var experiment = function(task_set,images,phase) {
          // If boxes subphase, assign correctness & reward
          switch (subphase){
             case "goals":
-               var correct = -1
-               var reward  = -1
+               var correct = null
+               var reward  = null
                break;
 
             case "boxes":
@@ -509,8 +514,8 @@ var experiment = function(task_set,images,phase) {
 
       }
       else {
-         var correct = -1;
-         var reward  = -1;
+         // var correct = -1;
+         // var reward  = -1;
          if (phase == 'inst') {resp_streak = 0}
       };
 
